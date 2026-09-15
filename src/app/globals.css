@@ -185,3 +185,48 @@ html:not([data-motion]) .colour-field{animation-play-state:paused}
 @media(max-width:640px){
 .events{padding-top:90px}.events-heading{align-items:flex-start;flex-direction:column;gap:18px;margin-bottom:32px}.events-heading>p{font-size:15px}.event-gallery{grid-template-columns:1fr;gap:44px}.event-photo{aspect-ratio:4/3}.event-caption{padding:21px 0 19px}.event-caption h3{font-size:27px}.event-caption p{max-width:none}.event-date{padding-top:14px}.events-footer{align-items:flex-start;flex-direction:column;gap:4px;margin-top:26px}.events-glow{inset:60px -20px 0}
 }
+
+/* Full-width chapters and an immediately visible community dock. */
+.site-header nav{display:flex;align-items:center;gap:30px}
+.details{background:#171827;border:0}
+.connect{position:relative;z-index:2;padding-top:0;padding-bottom:0;margin-top:-28px}
+.social-links{gap:20px;border:0;padding-bottom:0;max-width:none}
+.social-link,.social-link+.social-link{position:relative;overflow:hidden;isolation:isolate;border:1px solid #e0d8ff35;border-radius:18px;padding:30px 34px;background:#39306b;box-shadow:0 16px 50px #08081725;transition:transform .35s var(--ease),border-color .35s}
+.social-link::before{content:"";position:absolute;z-index:-1;inset:-60%;background:conic-gradient(from 45deg,transparent,#a393ff40,transparent,#92dcff30,transparent);animation:dock-light 22s linear infinite;filter:blur(35px);pointer-events:none}
+.social-link.social-luma{background:#254552}
+.social-link.social-discord{background:#413578}
+a.social-link:hover{background:#493e80;transform:translateY(-4px);border-color:#d9cfff88}
+.social-top{font-size:24px;font-weight:500;gap:15px}
+.social-top>svg:first-child{width:28px;height:28px}
+.social-top .arrow{color:#eee5ff;width:22px;height:22px}
+.social-description{padding-left:43px;color:#e1dcef;font-size:15px}
+.section-band{position:relative;isolation:isolate;overflow:hidden}
+.section-band::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#a4a2e46b 30%,#90e3ef80 65%,transparent)}
+.section-band::after{content:"";position:absolute;top:0;left:-30%;width:30%;height:2px;background:linear-gradient(90deg,transparent,#c2bdff,transparent);box-shadow:0 0 16px #a6aaff;animation:chapter-trace 12s ease-in-out infinite;pointer-events:none}
+.about-band{background:linear-gradient(130deg,#26223e,#1c2439);margin-top:80px}
+.events-band{background:linear-gradient(135deg,#191d31,#252344 60%,#292443)}
+.team-band{background:linear-gradient(135deg,#192f3b,#222640 65%,#302544)}
+.section-band .about,.section-band .events,.section-band .team{padding-top:100px;padding-bottom:105px;position:relative;z-index:1}
+.section-light{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.section-light span{position:absolute;width:70%;height:110%;top:-30%;left:-15%;background:radial-gradient(ellipse,#a477ff24,transparent 65%);filter:blur(30px);animation:chapter-aurora 19s ease-in-out infinite alternate}
+.section-light span+span{left:55%;top:10%;background:radial-gradient(ellipse,#54cfe82a,transparent 65%);animation-delay:-10s;animation-direction:alternate-reverse}
+.events-band .section-light span{background:radial-gradient(ellipse,#9770ef30,transparent 65%)}
+.team-band .section-light span{background:radial-gradient(ellipse,#43c5cf2e,transparent 65%)}
+.about-band .section-light::after{content:"";position:absolute;width:680px;height:680px;right:-390px;top:-140px;border:1px solid #a8bfff25;border-radius:50%;box-shadow:0 0 0 70px #b8a7ff08,0 0 0 140px #b8a7ff05;animation:chapter-aurora 22s ease-in-out infinite alternate}
+.section-band .eyebrow{color:#c2badb}
+.section-band .section-description,.section-band .team-intro{color:#dedbea}
+.section-band .welcome-note{color:#ccc7de}
+.events-heading>p,.event-caption p{color:#d3cee2}
+.event-date{color:#c6bfd9;border-color:#d5c7ff38}
+.events-footer p{color:#bcb4ce}
+.events-glow{display:none}
+.site-footer{background:transparent}
+@keyframes chapter-aurora{to{transform:translate3d(15%,14%,0) scale(1.18)}}
+@keyframes chapter-trace{0%,20%{left:-30%;opacity:0}30%{opacity:1}75%,100%{left:100%;opacity:0}}
+@keyframes dock-light{to{transform:rotate(360deg)}}
+[data-motion="paused"] .section-band::after,[data-motion="paused"] .section-light *,[data-motion="paused"] .section-light::after,[data-motion="paused"] .social-link::before,html:not([data-motion]) .section-band::after,html:not([data-motion]) .section-light *,html:not([data-motion]) .section-light::after,html:not([data-motion]) .social-link::before{animation-play-state:paused}
+@media(max-width:760px){
+.site-header nav{gap:16px}.nav-events{display:none}
+.connect{margin-top:-20px}.social-links{grid-template-columns:1fr;gap:12px;max-width:none}.social-link,.social-link+.social-link{padding:24px;border-radius:15px}.social-top{font-size:21px}.social-description{font-size:14px}
+.about-band{margin-top:60px}.section-band .about,.section-band .events,.section-band .team{padding-top:70px;padding-bottom:75px}.section-light span{width:130%;left:-45%}.section-light span+span{left:30%}.about-band .section-light::after{opacity:.5}
+}

@@ -22,7 +22,7 @@ export default function Home() {
       <Atmosphere />
       <header className="site-header shell">
         <Brand />
-        <nav aria-label="Main navigation"><a className="header-link" href={discord ?? "#connect"}>Join Discord <Arrow /></a></nav>
+        <nav aria-label="Main navigation"><a className="header-link nav-events" href="#events">Events</a><a className="header-link" href={discord ?? "#connect"}>Join Discord <Arrow /></a></nav>
       </header>
       <main id="main" tabIndex={-1}>
         <section className="hero" aria-labelledby="hero-title">
@@ -37,6 +37,17 @@ export default function Home() {
           <a className="scroll-cue" href="#about"><Arrow down /><span>Get to know us</span></a>
         </section>
         <div className="details">
+          <section id="connect" className="connect content-shell" aria-label="Connect with the collective">
+            <div className="social-links">
+              {socials.map((social) => {
+                const href = externalUrl(collective.links[social.key]);
+                const content = <><span className="social-top"><SocialIcon kind={social.key}/><span>{social.label}</span>{href && <Arrow />}</span><span className="social-description">{href ? social.description : "Link coming soon"}</span></>;
+                return href ? <a className={`social-link social-${social.key}`} key={social.key} href={href}>{content}</a> : <div className={`social-link social-${social.key} social-unavailable`} key={social.key}>{content}</div>;
+              })}
+            </div>
+          </section>
+          <div className="section-band about-band">
+            <div className="section-light" aria-hidden="true"><span/><span/></div>
           <section id="about" className="about content-shell" aria-labelledby="about-title">
             <div data-reveal>
               <p className="eyebrow">An OpenAI program</p>
@@ -46,6 +57,9 @@ export default function Home() {
               <a className="program-link" href="https://openai.com/student-collective/">About the program at OpenAI <Arrow /></a>
             </div>
           </section>
+          </div>
+          <div className="section-band events-band">
+            <div className="section-light" aria-hidden="true"><span/><span/></div>
           <section id="events" className="events content-shell" aria-labelledby="events-title">
             <div className="events-glow" aria-hidden="true" />
             <div className="events-heading" data-reveal>
@@ -66,15 +80,9 @@ export default function Home() {
               <a className="events-updates" href={discord ?? "#connect"}>Get event updates <Arrow /></a>
             </div>
           </section>
-          <section id="connect" className="connect content-shell" aria-label="Connect with the collective">
-            <div className="social-links" data-reveal>
-              {socials.map((social) => {
-                const href = externalUrl(collective.links[social.key]);
-                const content = <><span className="social-top"><SocialIcon kind={social.key}/><span>{social.label}</span>{href && <Arrow />}</span><span className="social-description">{href ? social.description : "Link coming soon"}</span></>;
-                return href ? <a className="social-link" key={social.key} href={href}>{content}</a> : <div className="social-link social-unavailable" key={social.key}>{content}</div>;
-              })}
-            </div>
-          </section>
+          </div>
+          <div className="section-band team-band">
+            <div className="section-light" aria-hidden="true"><span/><span/></div>
           <section id="team" className="team content-shell" aria-labelledby="team-title">
             <div data-reveal>
               <p className="eyebrow">Your Campus Leads</p>
@@ -92,6 +100,7 @@ export default function Home() {
               </div>
             </div>
           </section>
+          </div>
         </div>
       </main>
     </div>
