@@ -59,12 +59,39 @@ The linked Vercel project is
  The old GitHub Pages setup serves static HTML and cannot run the
 future server-backed check-in and admin features directly.
 
-This deliverable implements the public landing page. Authentication, attendee
-storage, check-in forms, and the admin panel are not yet implemented. Add those
-as App Router routes with server-side authorization and validation when their
-requirements are defined; do not store attendee data in this public content file.
+## Leads workspace and forms
 
-No API keys or external accounts are needed to run the landing page.
+`/leads` uses Google sign-in with a server-side email allowlist. Only verified
+accounts in `LEAD_EMAILS` can create sessions or access any leads API. Sessions
+last five days and are checked for revocation. Michael must be added explicitly.
+There is no public navigation link to the workspace; authorization protects it.
+
+The workspace supports check-in, interest, and feedback templates; custom
+questions; required fields; reordering; drafts; publication and closure; scheduling;
+duplication; live preview; shareable URLs; QR downloads; response details;
+search and filters; summary charts; and CSV export. Attendees do not sign in.
+Old responses preserve their original question labels and form version.
+Conflicting edits are rejected rather than overwriting someone else's changes.
+
+Firebase project: `ualberta-student-collective`. Firestore is in
+`northamerica-northeast1` (Montréal). The project uses its no-cost Spark plan.
+Vercel production environment variables hold the server credentials; use
+`.env.example` as a reference. No credentials are committed. Firebase browser
+configuration is intentionally public; database rules deny direct browser access.
+All database access passes through server endpoints with explicit authorization.
+
+Run `npm test` for validation and CSV tests, and `npm run build` for production.
+Deploy database rules with `npx firebase-tools deploy --only firestore:rules
+--project ualberta-student-collective`.
+
+Operational limits: lists show the latest 200 forms; response pages load 100 at
+a time and clearly label summaries as applying to loaded responses. CSV export
+supports up to 10,000 responses per form. Totals represent submissions, not unique
+people. Public submission endpoints use server validation, a honeypot, hashed
+IP/form rate buckets (300 per ten minutes to allow shared campus networks), and
+transactional idempotency for retries. Rate records contain no raw IP addresses.
+These controls deter simple spam; they are not identity verification or App Check.
+No Luma integration or automated AI processing of attendee data is enabled.
 
 ## Latest design revision
 
@@ -85,3 +112,13 @@ The hero uses animated orbital paths, drifting stars, and a faint perspective gr
 The pause control and reduced-motion preference cover all background animation.
 `src/app/opengraph-image.tsx` generates the branded 1200 by 630 PNG for shared links;
 it contains no team photo. Existing messages may retain cached previews.
+
+### Form appearance and check-in fields
+
+Each form has Aurora, Moving grid, or Plain backgrounds and an animation toggle.
+Attendees can pause motion; reduced-motion preferences override animations.
+Check-in includes campus role (students, faculty, staff, alumni, visitors), faculty,
+and faculty-dependent program choices. Year appears only for students. Other
+programs can be entered as text. The program list is a broad check-in list, not
+a complete admissions catalogue; maintain it in `src/lib/programs.ts`.
+The QR codes tab generates PNGs locally for any HTTP(S) link.
