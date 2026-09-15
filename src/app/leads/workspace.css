@@ -895,3 +895,5 @@ td:first-child {
 .workspace .attendee-form .choice:focus-within { outline: 3px solid #eee7ff; outline-offset: 3px; }
 @media(hover:hover) { .workspace .attendee-form .choice:hover { border-color: #e0d8ff; box-shadow: 0 0 0 1px #e0d8ff; } }
 @media(max-width:360px) { .workspace .attendee-form .choice { padding: 10px; gap: 4px; } }
+
+.workspace .action.danger { color:#ffd5dc; border-color:#d17f91; background:#492631; }

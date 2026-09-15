@@ -1,3 +1,4 @@
+import { deleteAllForms } from "@/lib/delete-forms";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/firebase-admin";
 import { body, checkOrigin, lead } from "@/lib/auth";
@@ -167,6 +168,7 @@ export async function PUT(req: Request, ctx: Context) {
       const snap = await tx.get(ref);
       if (!snap.exists) throw new Error("Form not found.");
       const old = snap.data()!;
+      if (old.deleting) throw new Error("This form is being deleted.");
       if (input.version !== old.version)
         throw new Error(
           "This form was edited elsewhere. Reload before saving.",
@@ -188,5 +190,20 @@ export async function PUT(req: Request, ctx: Context) {
       { error: e instanceof Error ? e.message : "Could not save form." },
       { status: 400 },
     );
+  }
+}
+
+export async function DELETE(req: Request, ctx: Context) {
+  if (!(await lead())) return Response.json({ error: "Sign in to continue." }, { status: 401 });
+  try {
+    checkOrigin(req);
+    const { path } = await ctx.params;
+    if (path.length !== 1 || path[0] !== "forms") return new Response(null, { status: 404 });
+    const input = await body(req);
+    if (input.confirmation !== "DELETE ALL FORMS") return Response.json({ error: "Confirm deletion of all forms." }, { status: 400 });
+    const deleted = await deleteAllForms(db());
+    return Response.json({ deleted });
+  } catch {
+    return Response.json({ error: "Deletion did not finish. Refresh and try again to remove remaining forms." }, { status: 500 });
   }
 }

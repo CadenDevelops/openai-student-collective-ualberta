@@ -126,6 +126,24 @@ export function Dashboard({ email }: { email: string }) {
       setBusy(false);
     }
   }
+  async function removeAllForms() {
+    if (!window.confirm("Permanently delete ALL forms, responses, and saved versions? This cannot be undone. Shared form links will stop working.")) return;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await api("forms", "DELETE", { confirmation: "DELETE ALL FORMS" });
+      setSelected(null);
+      setDirty(false);
+      setForms([]);
+      setSearch("");
+      setNotice("All forms and responses deleted.");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
   async function logout() {
     if (!leave()) return;
     await fetch("/api/session", { method: "DELETE" });
@@ -262,9 +280,10 @@ export function Dashboard({ email }: { email: string }) {
                       : "Select a form to view responses."}
                 </p>
               </div>
-              <button className="action" onClick={load} disabled={loading}>
-                Refresh
-              </button>
+              <div className="actions">
+                <button className="action" onClick={load} disabled={loading || busy}>Refresh</button>
+                <button className="action danger" onClick={removeAllForms} disabled={loading || busy || !forms.length}>{busy ? "Working" : "Delete all forms"}</button>
+              </div>
             </div>
             {view === "overview" && (
               <div className="metrics">
