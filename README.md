@@ -122,3 +122,8 @@ and faculty-dependent program choices. Year appears only for students. Other
 programs can be entered as text. The program list is a broad check-in list, not
 a complete admissions catalogue; maintain it in `src/lib/programs.ts`.
 The QR codes tab generates PNGs locally for any HTTP(S) link.
+
+Runtime: Node 24. `jwks-rsa` is pinned to 3.2.0 because version 4 requires
+ESM-through-require support disabled in the Vercel runtime. Firebase Auth module
+loading is verified with `node --no-experimental-require-module` before release.
+Track upstream: https://github.com/firebase/firebase-admin-node/issues/3181.
