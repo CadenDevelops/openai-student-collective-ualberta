@@ -50,11 +50,13 @@ content are included in the website.
 
 Production: https://openai-student-collective-ualberta.vercel.app
 
-Deployed directly with the Vercel CLI. To publish local updates, run
-`npx vercel deploy --prod` from this directory. The local project is linked to
+The GitHub repository is connected to Vercel. Pushes to `redesign/quiet-landing`
+automatically deploy to production. The `main` branch retains the earlier static
+site. For an explicit local deployment, run `npx vercel deploy --prod`.
+The linked Vercel project is
 `caden9036-5252s-projects/openai-student-collective-ualberta`.
-GitHub automatic deployments are not connected yet; Vercel requires a GitHub
-login connection first. The redesign has not been pushed to GitHub. The old GitHub Pages setup serves static HTML and cannot run the
+
+ The old GitHub Pages setup serves static HTML and cannot run the
 future server-backed check-in and admin features directly.
 
 This deliverable implements the public landing page. Authentication, attendee
@@ -76,3 +78,10 @@ locally so the page does not depend on expiring LinkedIn image URLs.
 Photo sources:
 - https://www.linkedin.com/in/caden-johnson-82ba12366/
 - https://www.linkedin.com/feed/update/urn:li:activity:7501032157247881216/
+
+## Motion and link previews
+
+The hero uses animated orbital paths, drifting stars, and a faint perspective grid.
+The pause control and reduced-motion preference cover all background animation.
+`src/app/opengraph-image.tsx` generates the branded 1200 by 630 PNG for shared links;
+it contains no team photo. Existing messages may retain cached previews.
