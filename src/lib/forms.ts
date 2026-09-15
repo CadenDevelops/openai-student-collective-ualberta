@@ -30,6 +30,13 @@ export type Submission = {
   answers: Record<string, string | string[]>;
   fields: Field[];
 };
+const campusFields: Field[] = [
+      { id: "role", label: "Campus role", type: "select", required: true, options: ["Undergraduate student", "Graduate student", "Faculty member", "Staff", "Alumni", "Visitor / other"] },
+      { id: "faculty", label: "Faculty", type: "select", required: true, options: Object.keys(programs) },
+      { id: "program", label: "Program", type: "program", required: true, options: [] },
+      { id: "program_other", label: "Program name", type: "text", required: false, options: [] },
+      { id: "year", label: "Year of study", type: "select", required: false, options: ["1", "2", "3", "4", "5+"] },
+];
 export const templates = {
   checkin: {
     title: "Event check-in",
@@ -42,11 +49,7 @@ export const templates = {
         required: true,
         options: [],
       },
-      { id: "role", label: "Campus role", type: "select", required: true, options: ["Undergraduate student", "Graduate student", "Faculty member", "Staff", "Alumni", "Visitor / other"] },
-      { id: "faculty", label: "Faculty", type: "select", required: true, options: Object.keys(programs) },
-      { id: "program", label: "Program", type: "program", required: true, options: [] },
-      { id: "program_other", label: "Program name", type: "text", required: false, options: [] },
-      { id: "year", label: "Year of study", type: "select", required: false, options: ["1", "2", "3", "4", "5+"] },
+      ...campusFields,
       {
         id: "source",
         label: "How did you hear about us?",
@@ -65,7 +68,7 @@ export const templates = {
   },
   interest: {
     title: "Stay in the loop",
-    description: "Tell us a little about yourself and what you’d like to try.",
+    description: "Tell us what interests you and when events work best. Select all options that suit you. Times are Edmonton time.",
     fields: [
       {
         id: "name",
@@ -81,6 +84,7 @@ export const templates = {
         required: true,
         options: [],
       },
+      ...campusFields,
       {
         id: "interest",
         label: "What interests you?",
@@ -92,6 +96,34 @@ export const templates = {
           "Meeting people",
           "Learning about AI",
         ],
+      },
+      {
+        id: "available_days",
+        label: "Which days usually work for you?",
+        type: "multi",
+        required: false,
+        options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      },
+      {
+        id: "preferred_times",
+        label: "What times work best?",
+        type: "multi",
+        required: false,
+        options: ["Morning · 9 am–noon", "Lunch · noon–2 pm", "Afternoon · 2–5 pm", "Early evening · 5–7 pm", "Evening · 7–9 pm"],
+      },
+      {
+        id: "event_length",
+        label: "Ideal event length",
+        type: "select",
+        required: false,
+        options: ["30 minutes", "1 hour", "90 minutes", "2 hours", "No preference"],
+      },
+      {
+        id: "availability_notes",
+        label: "Any scheduling details? (optional)",
+        type: "text",
+        required: false,
+        options: [],
       },
     ],
   },
