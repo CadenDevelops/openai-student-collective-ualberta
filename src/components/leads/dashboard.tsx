@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { type FormDefinition, type Submission, type Field } from "@/lib/forms";
 import { PublicForm } from "./public-form";
+import { DiscordPanel } from "./discord";
 async function api(path: string, method = "GET", data?: unknown) {
   const r = await fetch(`/api/leads/${path}`, {
     method,
@@ -161,6 +162,7 @@ export function Dashboard({ email }: { email: string }) {
           ["forms", "Forms"],
           ["responses", "Responses"],
           ["qr", "QR codes"],
+          ["discord", "Discord"],
         ].map(([id, label]) => (
           <button
             key={id}
@@ -260,7 +262,7 @@ export function Dashboard({ email }: { email: string }) {
               <Responses key={selected.id} form={selected} />
             )}
           </>
-        ) : view === "qr" ? <LinkQR /> : (
+        ) : view === "discord" ? <DiscordPanel forms={forms} /> : view === "qr" ? <LinkQR /> : (
           <>
             <div className="page-heading">
               <div>

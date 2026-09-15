@@ -11,11 +11,9 @@ function Brand({ footer = false }: { footer?: boolean }) {
 
 export default function Home() {
   const discord = externalUrl(collective.links.discord);
-  const events = externalUrl(collective.links.luma);
   const socials = [
     { key: "discord" as const, label: "Discord", description: "Join the conversation." },
     { key: "luma" as const, label: "Luma events", description: "Find your next meetup." },
-    { key: "instagram" as const, label: "Instagram", description: "See what we’re up to." },
   ];
 
   return <>
@@ -33,7 +31,7 @@ export default function Home() {
             <p className="hero-description">OpenAI’s student program. Right here at UAlberta.</p>
             <div className="hero-actions">
               <a className="button button-primary" href={discord ?? "#connect"}>Join Discord <Arrow /></a>
-              <a className="button button-secondary" href={events ?? "#connect"}>View events <Arrow /></a>
+              <a className="button button-secondary" href="#events">View events <Arrow /></a>
             </div>
           </div>
           <a className="scroll-cue" href="#about"><Arrow down /><span>Get to know us</span></a>
@@ -47,6 +45,20 @@ export default function Home() {
               <p className="welcome-note">Come try something new, get help with a project, or meet people outside your usual classes. No coding experience needed.</p>
               <a className="program-link" href="https://openai.com/student-collective/">About the program at OpenAI <Arrow /></a>
             </div>
+          </section>
+          <section id="events" className="events content-shell" aria-labelledby="events-title">
+            <div className="events-glow" aria-hidden="true" />
+            <div className="events-heading" data-reveal>
+              <div><p className="eyebrow">On campus</p><h2 id="events-title">Events</h2></div>
+              <p>Workshops, project help, and demos.<br/>Dates will be announced here.</p>
+            </div>
+            <ul className="event-lines" aria-label="Event formats and upcoming dates">
+              {collective.events.formats.map((format, index) => <li key={format.title} data-reveal>
+                <div className="event-line-copy"><h3>{format.title}</h3><p>{format.description}</p></div>
+                <div className="event-line-date"><span>{collective.events.upcoming[index].date}</span><small>{format.status ?? collective.events.upcoming[index].status}</small></div>
+              </li>)}
+            </ul>
+            <div className="events-footer"><p>Open to all programs and experience levels.</p><a href={discord ?? "#connect"}>Get updates on Discord <Arrow /></a></div>
           </section>
           <section id="connect" className="connect content-shell" aria-label="Connect with the collective">
             <div className="social-links" data-reveal>

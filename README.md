@@ -127,3 +127,25 @@ Runtime: Node 24. `jwks-rsa` is pinned to 3.2.0 because version 4 requires
 ESM-through-require support disabled in the Vercel runtime. Firebase Auth module
 loading is verified with `node --no-experimental-require-module` before release.
 Track upstream: https://github.com/firebase/firebase-admin-node/issues/3181.
+
+## Discord announcements
+
+The leads dashboard has a Discord tool for regular messages and a full single-embed
+editor (author, title/link, description, accent colour, thumbnail, image, up to 25
+fields, footer, and send timestamp). Published forms can populate either mode.
+Messages send only when a lead presses Send. The preview is approximate for Markdown.
+
+The webhook URL is stored in the private Firestore `settings/discord` document,
+never returned by the API or stored in browser storage. Only approved lead sessions
+can configure or send. The server accepts only Discord HTTPS webhook endpoints,
+blocks redirects, enforces Discord size limits, and disables mention notifications.
+Every post uses the collective name and the OpenAI logo PNG. Use a text-channel
+webhook; forum/thread webhooks are not supported. A delivery timeout may be
+ambiguous: check the channel before retrying. No webhook has been configured by
+the implementation workflow and no live Discord test message has been sent.
+
+## Event information
+
+Event formats and tentative date placeholders are in `src/content/collective.ts`.
+The landing page keeps the hero simple and displays these details below the fold.
+Instagram has been removed from the public page.
