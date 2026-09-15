@@ -21,6 +21,7 @@ export function Question({
             {f.label}
             {f.required ? " *" : ""}
           </legend>
+          <p className="choice-hint">Select all that apply.</p>
           <div className="choice-list">
             {f.options.map((o) => (
               <label key={o} className="choice">
@@ -34,7 +35,8 @@ export function Question({
                     );
                   }}
                 />
-                {o}
+                <span className="choice-label">{o}</span>
+                <span className="choice-mark" aria-hidden="true">{Array.isArray(value) && value.includes(o) ? "✓" : "+"}</span>
               </label>
             ))}
           </div>
