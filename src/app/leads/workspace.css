@@ -849,35 +849,36 @@ td:first-child {
 @keyframes form-grid { to { background-position:0 60px,0 60px; } }
 @media(prefers-reduced-motion:reduce) { .form-backdrop i { animation:none !important; } .form-motion { display:none; } }
 
-/* Attendee forms: brighter surfaces and large multi-select tiles. */
+/* Attendee forms: dark layered surfaces and quiet violet accents. */
 .workspace .panel.attendee-form {
-  background: linear-gradient(145deg, #30374d, #242d40);
-  border-color: #8391b566;
-  box-shadow: 0 24px 80px #050a1844;
+  background: linear-gradient(155deg, #1c2030, #151a27 75%);
+  border-color: #ffffff1f;
+  border-radius: 24px;
+  box-shadow: 0 28px 80px #03061066, inset 0 1px 0 #ffffff08;
 }
-.attendee-form .muted, .attendee-form .privacy { color: #d4dbea; }
+.attendee-form .muted, .attendee-form .privacy { color: #b6bfd1; }
 .attendee-form label, .attendee-form legend { color: #f5f7ff; }
 .workspace .attendee-form input:not([type="checkbox"]),
 .workspace .attendee-form select, .workspace .attendee-form textarea {
-  background: #1e293c;
-  border-color: #8393b3;
+  background: #101621;
+  border-color: #526079;
   color: #fff;
 }
-.attendee-form input::placeholder, .attendee-form textarea::placeholder { color: #bdc9dd; }
+.attendee-form input::placeholder, .attendee-form textarea::placeholder { color: #a7b3c9; }
 .attendee-form .choice-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
-.attendee-form .choice-hint { color: #d4dbea; font-size: 12px; margin: 0 0 12px; }
+.attendee-form .choice-hint { color: #b6bfd1; font-size: 12px; margin: 0 0 12px; }
 .workspace .attendee-form .choice {
   position: relative;
   gap: 8px;
   justify-content: space-between;
   min-height: 64px;
   padding: 14px;
-  background: #344158;
-  border: 1px solid #8495b5;
+  background: linear-gradient(150deg, #222938, #1c2331);
+  border: 1px solid #58637a;
   color: #fff;
   border-radius: 13px;
   cursor: pointer;
@@ -887,13 +888,20 @@ td:first-child {
 .attendee-form .choice-mark { font-size: 19px; width: 20px; flex-shrink: 0; text-align: center; }
 .workspace .attendee-form .choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .workspace .attendee-form .choice:has(input:checked) {
-  background: #d2c6ff;
-  border-color: #ece5ff;
-  color: #1d163d;
-  box-shadow: inset 0 0 0 1px #ece5ff;
+  background: linear-gradient(140deg, #39314f, #29283e);
+  border-color: #ae9bdd;
+  color: #f2ecff;
+  box-shadow: inset 0 0 0 1px #ae9bdd22;
 }
-.workspace .attendee-form .choice:focus-within { outline: 3px solid #eee7ff; outline-offset: 3px; }
-@media(hover:hover) { .workspace .attendee-form .choice:hover { border-color: #e0d8ff; box-shadow: 0 0 0 1px #e0d8ff; } }
+.workspace .attendee-form .choice:focus-within { outline: 2px solid #c5b4ef; outline-offset: 3px; }
+@media(hover:hover) { .workspace .attendee-form .choice:hover { border-color: #a899c6; box-shadow: 0 4px 16px #00000020; } }
 @media(max-width:360px) { .workspace .attendee-form .choice { padding: 10px; gap: 4px; } }
 
 .workspace .action.danger { color:#ffd5dc; border-color:#d17f91; background:#492631; }
+
+.attendee-form .pill { background:#ffffff05; border-color:#ffffff20; color:#c4bcda; letter-spacing:.025em; }
+.attendee-form .choice-mark { color:#9cabc2; }
+.attendee-form .choice:has(input:checked) .choice-mark { color:#d5c4ff; }
+.attendee-form .primary { background:linear-gradient(120deg,#d8cafa,#c3b4e9); color:#211832; border-color:#e2d8f4; box-shadow:0 6px 22px #00000026; }
+.attendee-form .questions { border-top:1px solid #ffffff10; padding-top:26px; }
+.attendee-form .privacy { border-top:1px solid #ffffff10; padding-top:22px; }
