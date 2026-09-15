@@ -49,16 +49,22 @@ export default function Home() {
           <section id="events" className="events content-shell" aria-labelledby="events-title">
             <div className="events-glow" aria-hidden="true" />
             <div className="events-heading" data-reveal>
-              <div><p className="eyebrow">On campus</p><h2 id="events-title">Events</h2></div>
-              <p>Workshops, project help, and demos.<br/>Dates will be announced here.</p>
+              <div><p className="eyebrow">On campus</p><h2 id="events-title">Events at UAlberta</h2></div>
+              <p>On campus, with people from every program.<br/>No experience needed.</p>
             </div>
-            <ul className="event-lines" aria-label="Event formats and upcoming dates">
-              {collective.events.formats.map((format, index) => <li key={format.title} data-reveal>
-                <div className="event-line-copy"><h3>{format.title}</h3><p>{format.description}</p></div>
-                <div className="event-line-date"><span>{collective.events.upcoming[index].date}</span><small>{format.status ?? collective.events.upcoming[index].status}</small></div>
+            <ul className="event-gallery" aria-label="Event formats">
+              {collective.events.formats.map((format) => <li key={format.title} data-reveal>
+                <div className="event-photo">
+                  <img src={format.image} alt={format.alt} width="1200" height="800" loading="lazy" />
+                </div>
+                <div className="event-caption"><h3>{format.title}</h3><p>{format.description}</p></div>
+                <p className="event-date">{format.date}</p>
               </li>)}
             </ul>
-            <div className="events-footer"><p>Open to all programs and experience levels.</p><a href={discord ?? "#connect"}>Get updates on Discord <Arrow /></a></div>
+            <div className="events-footer">
+              <p>Photos from the wider <a href="https://openai.com/student-collective/">OpenAI Student Collective</a>.</p>
+              <a className="events-updates" href={discord ?? "#connect"}>Get event updates <Arrow /></a>
+            </div>
           </section>
           <section id="connect" className="connect content-shell" aria-label="Connect with the collective">
             <div className="social-links" data-reveal>
