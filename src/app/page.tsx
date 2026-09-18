@@ -4,64 +4,78 @@ import { collective, externalUrl } from "@/content/collective";
 
 function Brand({ footer = false }: { footer?: boolean }) {
   return <a className={`brand${footer ? " brand-footer" : ""}`} href="#top" aria-label="OpenAI Student Collective, back to top">
-    <img className="brand-logo" src="/openai-blossom.svg" width="40" height="40" alt="" />
+    <img className="brand-logo" src="/collective-mark.png" width="40" height="40" alt="" />
     <span className="brand-copy"><span>{collective.name}</span><span>{collective.university}</span></span>
   </a>;
 }
 
 export default function Home() {
   const discord = externalUrl(collective.links.discord);
-  const socials = [
+  // Only destinations that actually exist become cards; a missing link is left out entirely.
+  const socials = ([
     { key: "discord" as const, label: "Discord", description: "Join the conversation." },
-    { key: "luma" as const, label: "Luma events", description: "Find your next meetup." },
-  ];
+    { key: "luma" as const, label: "Luma", description: "Browse upcoming events." },
+  ]).flatMap((social) => {
+    const href = externalUrl(collective.links[social.key]);
+    return href ? [{ ...social, href }] : [];
+  });
 
   return <>
     <a className="skip-link" href="#main">Skip to main content</a>
     <div id="top" className="first-screen">
-      <Atmosphere />
       <header className="site-header shell">
         <Brand />
-        <nav aria-label="Main navigation"><a className="header-link nav-events" href="#events">Events</a><a className="header-link" href={discord ?? "#connect"}>Join Discord <Arrow /></a></nav>
       </header>
       <main id="main" tabIndex={-1}>
         <section className="hero" aria-labelledby="hero-title">
+          <Atmosphere />
           <div className="hero-content">
+            <p className="hero-badge">Free ChatGPT Plus at workshops</p>
             <h1 id="hero-title">Explore AI<span>with us.</span></h1>
             <p className="hero-description">OpenAI’s student program. Right here at UAlberta.</p>
-            <div className="hero-actions">
-              <a className="button button-primary" href={discord ?? "#connect"}>Join Discord <Arrow /></a>
-              <a className="button button-secondary" href="#events">View events <Arrow /></a>
-            </div>
+            <nav className="link-stack" aria-label="Find the collective">
+              <p className="stack-label">Find us</p>
+              <div className="link-rows">
+                {socials.map((social) => <a className={`link-row link-${social.key}`} key={social.key} href={social.href}>
+                  <span className="link-icon"><SocialIcon kind={social.key} /></span>
+                  <span className="link-copy"><span className="link-label">{social.label}</span><span className="link-note">{social.description}</span></span>
+                  <span className="link-go"><Arrow /></span>
+                </a>)}
+              </div>
+            </nav>
           </div>
           <a className="scroll-cue" href="#about"><Arrow down /><span>Get to know us</span></a>
         </section>
         <div className="details">
-          <section id="connect" className="connect content-shell" aria-label="Connect with the collective">
-            <div className="social-links">
-              {socials.map((social) => {
-                const href = externalUrl(collective.links[social.key]);
-                const content = <><span className="social-top"><SocialIcon kind={social.key}/><span>{social.label}</span>{href && <Arrow />}</span><span className="social-description">{href ? social.description : "Link coming soon"}</span></>;
-                return href ? <a className={`social-link social-${social.key}`} key={social.key} href={href}>{content}</a> : <div className={`social-link social-${social.key} social-unavailable`} key={social.key}>{content}</div>;
-              })}
-            </div>
-          </section>
           <div className="section-band about-band">
             <div className="section-light" aria-hidden="true"><span/><span/></div>
           <section id="about" className="about content-shell" aria-labelledby="about-title">
             <div data-reveal>
-              <p className="eyebrow">An OpenAI program</p>
-              <h2 id="about-title">So, what’s the Collective?</h2>
-              <p className="section-description">The Student Collective is OpenAI’s campus program for learning and building with ChatGPT and Codex. At UAlberta, that means workshops, drop-in studio hours, and a place to work on your own ideas. All the tools you need to start creating will be provided for free.</p>
-              <p className="welcome-note">Come try something new, get help with a project, or meet people outside your usual classes. No coding experience needed.</p>
-              <a className="program-link" href="https://openai.com/student-collective/">About the program at OpenAI <Arrow /></a>
+              <div className="about-grid">
+                <div className="about-heading">
+                  <p className="eyebrow">An OpenAI program</p>
+                  <h2 id="about-title">So, what’s the Collective?</h2>
+                </div>
+                <div className="about-copy">
+                  <p className="section-description">The Student Collective is OpenAI’s campus program for learning and building with ChatGPT and Codex. At UAlberta, that means workshops, drop-in studio sessions, and a place to work on your own ideas. All the tools you need to start creating will be provided for free.</p>
+                  <p className="welcome-note">Come try something new, get help with a project, or meet people outside your usual classes. No coding experience needed.</p>
+                  <div className="perk">
+                    <p className="perk-tag">Included</p>
+                    <p>Come to a workshop and you’ll get a free month of ChatGPT Plus on your personal account.</p>
+                  </div>
+                  <a className="program-link" href="https://openai.com/student-collective/">About the program at OpenAI <Arrow /></a>
+                </div>
+              </div>
+              <div className="about-figure" aria-hidden="true">
+                <div className="figure-glow" />
+                <div className="figure-rings"><span /><span /><span /></div>
+              </div>
             </div>
           </section>
           </div>
           <div className="section-band events-band">
             <div className="section-light" aria-hidden="true"><span/><span/></div>
           <section id="events" className="events content-shell" aria-labelledby="events-title">
-            <div className="events-glow" aria-hidden="true" />
             <div className="events-heading" data-reveal>
               <div><p className="eyebrow">On campus</p><h2 id="events-title">Events at UAlberta</h2></div>
               <p>On campus, with people from every program.<br/>No experience needed.</p>
@@ -72,12 +86,12 @@ export default function Home() {
                   <img src={format.image} alt={format.alt} width="1200" height="800" loading="lazy" />
                 </div>
                 <div className="event-caption"><h3>{format.title}</h3><p>{format.description}</p></div>
-                <p className="event-date">{format.date}</p>
               </li>)}
             </ul>
+            <p className="events-note">{collective.events.note}</p>
             <div className="events-footer">
               <p>Photos from the wider <a href="https://openai.com/student-collective/">OpenAI Student Collective</a>.</p>
-              <a className="events-updates" href={discord ?? "#connect"}>Get event updates <Arrow /></a>
+              <a className="events-updates" href={discord ?? "#top"}>Get event updates <Arrow /></a>
             </div>
           </section>
           </div>
@@ -95,7 +109,13 @@ export default function Home() {
                 </figure>
                 <ul className="team-list">{collective.team.map((member) => <li key={member.name}>
                   <img className="member-photo" src={member.photo} alt={member.name} width="88" height="88" loading="lazy" />
-                  <div><h3><a href={member.linkedin}>{member.name} <Arrow /></a></h3><p>{member.role}</p><p className="member-program">{member.program}</p></div>
+                  <div>
+                    <h3>{member.name}</h3><p>{member.role}</p><p className="member-program">{member.program}</p>
+                    <div className="member-links">
+                      <a href={member.linkedin} aria-label={`${member.name} on LinkedIn`}><SocialIcon kind="linkedin" />LinkedIn</a>
+                      <a href={member.instagram} aria-label={`${member.name} on Instagram`}><SocialIcon kind="instagram" />Instagram</a>
+                    </div>
+                  </div>
                 </li>)}</ul>
               </div>
             </div>
@@ -104,7 +124,10 @@ export default function Home() {
         </div>
       </main>
     </div>
-    <footer className="site-footer shell"><Brand footer /><p>Part of the OpenAI Student Collective.</p></footer>
+    <footer className="site-footer shell">
+      <Brand footer />
+      {discord ? <a className="footer-link" href={discord}>Join the Discord <Arrow /></a> : <p>Part of the OpenAI Student Collective.</p>}
+    </footer>
     <ScrollReveals />
   </>;
 }

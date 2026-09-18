@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://openai-student-collective-ualberta.vercel.app"),
   twitter: { card: "summary_large_image" },
   title: "OpenAI Student Collective | University of Alberta",
-  description: "Explore AI with us. OpenAI’s student program at the University of Alberta. Workshops, studio hours, and student projects with ChatGPT and Codex.",
+  description: "Explore AI with us. OpenAI’s student program at the University of Alberta. Workshops, studio sessions, and student projects with ChatGPT and Codex.",
   openGraph: {
     title: "OpenAI Student Collective at UAlberta",
     description: "Explore AI with us. OpenAI’s student program at UAlberta, led by Caden Johnson and Michael Seguin.",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_CA",
   },
-  icons: { icon: "/openai-blossom.svg" },
+  icons: { icon: "/collective-mark.png" },
 };
 
 export const viewport: Viewport = { themeColor: "#08090f", colorScheme: "dark" };

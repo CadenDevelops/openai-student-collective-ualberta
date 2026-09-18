@@ -52,7 +52,7 @@ export function DiscordPanel({forms}:{forms:FormDefinition[]}) {
     <div className="discord-send-row"><span className="small muted">{configured?'Posts to the connected channel.':'Connect a webhook to send.'}</span><button className="action primary" disabled={!configured||!payload||alreadySent}>{busy==='send'?'Sending':alreadySent?'Sent':'Send to Discord'} <span aria-hidden="true">↗</span></button></div>
    </fieldset></form>
    <aside className="discord-preview-column" aria-label="Message preview"><div className="discord-section-title"><h2>Preview</h2></div>
-    <div className="discord-preview"><div className="discord-preview-header"><img src="/openai-webhook.png" width="40" height="40" alt="OpenAI logo"/><div><strong>{DISCORD_NAME}</strong><span className="discord-app-badge">APP</span><small>Today</small></div></div>
+    <div className="discord-preview"><div className="discord-preview-header"><img className="discord-preview-avatar" src="/collective-logo.png" width="40" height="40" alt=""/><div><strong>{DISCORD_NAME}</strong><span className="discord-app-badge">APP</span><small>Today</small></div></div>
      {draft.mode==='message'?<p className="discord-plain-preview">{draft.content.trim()||'Your message will appear here.'}</p>:preview?.embeds?.[0]?<EmbedPreview embed={preview.embeds[0]}/>:<div className="discord-empty-preview">Your embed will appear here.</div>}
     </div><p className="small muted discord-preview-note">Discord may render Markdown and links differently. Mentions won’t notify anyone.</p>
    </aside>
