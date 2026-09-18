@@ -56,7 +56,6 @@ export function LeadLogin({ ready }: { ready: boolean }) {
         {busy ? "Signing in…" : "Continue with Google"}{" "}
         <span aria-hidden="true">↗</span>
       </button>
-      <p className="small muted">Access is limited to approved Campus Leads.</p>
       {!ready && (
         <p role="status">
           The workspace is being connected. Please check back shortly.

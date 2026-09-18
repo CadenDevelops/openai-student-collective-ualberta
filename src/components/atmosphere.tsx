@@ -38,6 +38,8 @@ export function Atmosphere() {
       </div>
       <div className="star-field" />
       <div className="horizon-grid" />
+      <div className="horizon-line" />
+      <div className="scan-lines" />
       <div className="atmosphere-shade" />
     </div>
     {ready && <button type="button" className="motion-toggle" onClick={toggle} aria-label={paused ? "Play background animation" : "Pause background animation"} title={paused ? "Play background animation" : "Pause background animation"}>

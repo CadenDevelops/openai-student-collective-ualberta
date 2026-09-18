@@ -14,16 +14,16 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. For a production build, run `npm run build`, then
+Open http://127.0.0.1:8000. For a production build, run `npm run build`, then
 `npm start`. `npm run typecheck` checks TypeScript independently.
 
 ## Content
 
-Edit `src/content/collective.ts` for links, names, roles, and programs. Discord is
-configured with the supplied invite. Luma and Instagram are intentionally empty
-until their URLs are supplied. Empty social destinations display “Link coming soon”
-instead of linking to an unrelated page; the events button scrolls to this section.
-Only HTTPS links are accepted.
+Edit `src/content/collective.ts` for links, names, roles, and programs. Discord
+and Luma are configured with the supplied URLs; Instagram is intentionally empty
+until one is supplied. A destination without a URL is not rendered at all, so the
+link hub never shows a row that cannot be clicked; adding a URL adds its row to
+the stack with no CSS change. Only HTTPS links are accepted.
 
 Team content: Caden's name, role, and program were supplied by Caden. Michael's
 spelling and program were verified against the OpenAI Student Collective
@@ -146,6 +146,46 @@ the implementation workflow and no live Discord test message has been sent.
 
 ## Event information
 
-Event formats and tentative date placeholders are in `src/content/collective.ts`.
+Event formats are in `src/content/collective.ts`. Scheduling is a single
+`events.note` line under the gallery rather than a placeholder date on each card,
+so three identical “date to be announced” lines cannot make the site look stalled.
 The landing page keeps the hero simple and displays these details below the fold.
 Instagram has been removed from the public page.
+
+## Interface revision
+
+A pass over the landing page, September 15, 2026:
+
+- The link hub renders only links that exist, as a stack of full-width rows
+  inside a framed panel. It sits in the hero rather than below it: the page is
+  handed out as a QR code, so a scan has to land with both destinations already
+  on screen. Each row carries its own `--brand`/`--brand-2` pair (Discord
+  blurple, Luma warm red) and nothing else changes per service. Rows are 80px
+  and up, well past the 44px touch minimum, and `:active` scales them slightly
+  so a tap reads on a phone, where there is no hover to fall back on.
+- The atmosphere is pinned to the hero's own box rather than to a fixed height,
+  so the first screen can grow with what it holds and the background always
+  ends where the hero does.
+- `.about-figure` closes the About section: three tilted CSS rings with
+  travelling highlights, echoing the hero's orbital motif. It is decorative,
+  so it is `aria-hidden` and carries no text, and it honours the pause control
+  and `prefers-reduced-motion` like the rest of the page. It deliberately does
+  not involve the OpenAI blossom — that mark is used under permission and should
+  not be rotated, recoloured, or animated. The rings hold still and only the
+  highlight travels; animating the ring transforms would converge all three on a
+  shared keyframe and stack them on top of each other.
+- Running prose in the About section is left-aligned inside a centred column;
+  only the eyebrow and heading stay centred.
+- The dock sits in `.connect-band`, whose gradient fades into the first chapter,
+  replacing the flat dark strip that used to read as a seam.
+- The campus photo is cropped square with `object-position: 50% 90%` and graded to
+  match the palette. The offset is chosen to keep both figures whole and must be
+  re-checked if the photo is replaced.
+- The hero is `92svh` under 760px so the Discord card is visible above the fold.
+- `globals.css` was consolidated from five appended override layers into one
+  cascade. Dead rules were removed (`.events-glow`, which was built and then
+  hidden; `.member-monogram`, which had no markup; `.event-date`). Several
+  declarations that were silently overridden by a later duplicate are now stated
+  once at their effective value. The `prefers-contrast: more` dimming of the
+  colour fields had been cancelled by a later `opacity` declaration and now
+  applies.
