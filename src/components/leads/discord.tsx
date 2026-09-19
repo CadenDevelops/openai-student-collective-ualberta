@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { FormDefinition } from "@/lib/forms";
+import { siteUrl } from "@/content/collective";
 import { emptyDiscordDraft, normalizeDiscordMessage, DISCORD_NAME, type EmbedDraft, type DiscordEmbed, type DiscordMessagePayload } from "@/lib/discord";
 
-const site="https://openai-student-collective-ualberta.vercel.app";
+const site=siteUrl;
 async function request(method:string,data?:unknown) {
  const response=await fetch('/api/discord',{method,headers:{'Content-Type':'application/json'},body:data?JSON.stringify(data):undefined});
  const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not complete the request.');return result;

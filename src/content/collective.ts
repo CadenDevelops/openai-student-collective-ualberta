@@ -1,4 +1,8 @@
 // Keep public community content here. Never put credentials or attendee data here.
+// The canonical origin lives here too: link previews, the Discord webhook avatar
+// and the form links shared into Discord all need the same absolute URL.
+export const siteUrl = "https://studentcollectiveualberta.com";
+
 // Links without a URL are simply not rendered rather than shown as dead placeholders.
 export const collective = {
   name: "OpenAI Student Collective",
