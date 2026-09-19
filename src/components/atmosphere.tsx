@@ -33,6 +33,7 @@ export function Atmosphere() {
       <div className="colour-field field-violet" />
       <div className="colour-field field-blue" />
       <div className="colour-field field-rose" />
+      <div className="sky-tint" />
       <div className="orbital-system">
         <div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="orbit orbit-three" />
       </div>
