@@ -55,7 +55,7 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 /* The one concrete offer on the page, so it sits above the headline where a
    QR scan cannot miss it. No animation on the dot: it would need wiring into
    the pause control for the sake of a 7px circle. */
-.hero-badge{display:inline-flex;align-items:center;gap:10px;margin:0 0 26px;padding:9px 18px 9px 14px;border:1px solid #7de6ff3d;border-radius:999px;background:#6ee7ff14;backdrop-filter:blur(10px);font-size:14px;font-weight:450;line-height:1.4;letter-spacing:-.01em;color:#dff2ff}
+.hero-badge{display:inline-flex;align-items:center;gap:10px;margin:0 0 26px;padding:9px 18px 9px 14px;border:1px solid #7de6ff3d;border-radius:999px;background:linear-gradient(180deg,#1b2d44e6,#162538e6);font-size:14px;font-weight:450;line-height:1.4;letter-spacing:-.01em;color:#dff2ff}
 .hero-badge::before{content:"";width:6px;height:6px;flex-shrink:0;border-radius:50%;background:#5ff0ff;box-shadow:0 0 10px #5ff0ff}
 .hero-description{font-size:clamp(16px,1.4vw,19px);font-weight:400;line-height:1.7;color:#c0c1d2;margin:25px auto 0;max-width:590px;letter-spacing:-.02em;text-wrap:balance}
 .scroll-cue{position:absolute;bottom:41px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;flex-direction:column;color:#b5b5c8;font-size:12px;min-height:48px;white-space:nowrap;padding:8px}
@@ -73,29 +73,47 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 /* ------------------------------------------------------------ atmosphere */
 
 /* Pinned to the hero rather than to a fixed height, so the first screen can
-   grow with its contents and the background always ends where it ends. The
-   slow hue drift is on the whole layer, so every field shifts together rather
-   than sliding out of relation with one another. */
-.atmosphere{position:absolute;z-index:-1;inset:0;overflow:hidden;pointer-events:none;background:#0b0c18;animation:sky-shift 48s ease-in-out infinite alternate}
-.colour-field{position:absolute;border-radius:50%;will-change:transform;animation:drift-violet 26s ease-in-out infinite alternate}
-.field-violet{width:90%;height:115%;top:-24%;left:3%;filter:blur(28px);background:radial-gradient(ellipse,#8b5cf67a 0%,#6d28d94d 29%,#3b0d8a26 47%,transparent 67%)}
-.field-blue{width:88%;height:120%;top:-27%;left:43%;filter:blur(30px);background:radial-gradient(ellipse,#22d3ee6b 0%,#0e749045 31%,transparent 65%);animation:drift-blue 30s ease-in-out infinite alternate}
-.field-rose{width:76%;height:87%;top:11%;left:-32%;filter:blur(45px);background:radial-gradient(ellipse,#e935c159 0%,#7c2d6b40 22%,transparent 66%);animation:drift-rose 23s ease-in-out infinite alternate}
+   grow with its contents and the background always ends where it ends.
+
+   Performance rule for everything in here: a layer may animate transform or
+   opacity and nothing else. No filter, blend mode, backdrop, or
+   background-position animation. Any of those makes the browser repaint the
+   whole first screen every frame, which at 1920px wide on a 2x display is
+   several hundred milliseconds of raster work per frame. Softness is baked
+   into the gradient stops instead of blurred at runtime, and each layer is
+   promoted once with will-change so it is rasterised a single time and then
+   only moved by the compositor. */
+.atmosphere{position:absolute;z-index:-1;inset:0;overflow:hidden;pointer-events:none;background:#0b0c18;contain:layout paint}
+.atmosphere>*{will-change:transform,opacity;backface-visibility:hidden}
+.colour-field{position:absolute;border-radius:50%;animation:drift-violet 26s ease-in-out infinite alternate}
+.field-violet{width:90%;height:115%;top:-24%;left:3%;background:radial-gradient(ellipse,#8b5cf67a 0%,#6d28d94d 27%,#3b0d8a26 45%,#3b0d8a0f 58%,transparent 70%)}
+.field-blue{width:88%;height:120%;top:-27%;left:43%;background:radial-gradient(ellipse,#22d3ee6b 0%,#0e749045 29%,#0e749018 50%,transparent 68%);animation:drift-blue 30s ease-in-out infinite alternate}
+.field-rose{width:76%;height:87%;top:11%;left:-32%;background:radial-gradient(ellipse,#e935c159 0%,#7c2d6b40 20%,#7c2d6b1a 45%,transparent 70%);animation:drift-rose 23s ease-in-out infinite alternate}
+/* The slow colour drift that used to be a hue-rotate on the whole layer. A
+   tinted sheet fading in and out gives the same "sky changes over a minute"
+   feel for the cost of one opacity animation. */
+.sky-tint{position:absolute;inset:0;background:linear-gradient(160deg,#4a3cff 0%,transparent 48%,#18c8e8 100%);opacity:0;animation:sky-shift 48s ease-in-out infinite alternate}
 .atmosphere-shade{position:absolute;inset:0;background:radial-gradient(ellipse at center,#0b0c18b0 0%,#0b0c1866 27%,transparent 60%),linear-gradient(180deg,#0b0c1870,transparent 26%,transparent 74%,#14142899 93%,#171827)}
 
 /* Luminous orbital paths frame the quiet centre of the hero. */
 .orbital-system{position:absolute;inset:0;display:grid;place-items:center;perspective:900px;opacity:.8}
-.orbit{position:absolute;width:min(1050px,125vw);aspect-ratio:1;border-radius:50%;border:1px solid #a7a0ff55;box-shadow:0 0 28px #7658ff30,inset 0 0 28px #7658ff20;transform:rotateX(65deg) rotateZ(-28deg);animation:orbit-drift 28s ease-in-out infinite alternate}
-.orbit::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid transparent;border-top-color:#5ff0ff;border-right-color:#b48cff99;filter:drop-shadow(0 0 12px #35e3ff);animation:orbit-travel 22s linear infinite}
+.orbit{position:absolute;width:min(1050px,125vw);aspect-ratio:1;border-radius:50%;border:1px solid #a7a0ff55;box-shadow:0 0 28px #7658ff30,inset 0 0 28px #7658ff20;transform:rotateX(65deg) rotateZ(-28deg);will-change:transform;animation:orbit-drift 28s ease-in-out infinite alternate}
+/* The travelling highlight is its own compositor layer, so its glow is drawn
+   once and the rotation just spins that texture. */
+.orbit::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid transparent;border-top-color:#5ff0ff;border-right-color:#b48cff99;filter:drop-shadow(0 0 12px #35e3ff);will-change:transform;animation:orbit-travel 22s linear infinite}
 .orbit-two{width:min(1250px,152vw);transform:rotateX(62deg) rotateY(25deg) rotateZ(35deg);animation-delay:-11s;opacity:.65}
 .orbit-two::after{border-top-color:#c9a0ff;animation-duration:32s;animation-direction:reverse}
 .orbit-three{width:min(1450px,175vw);transform:rotateX(70deg) rotateY(-20deg);animation-delay:-19s;opacity:.35}
 .star-field{position:absolute;inset:0;background-image:radial-gradient(circle at 12% 24%,#d0c4ff 0 1px,transparent 2px),radial-gradient(circle at 82% 27%,#adefff 0 1px,transparent 2px),radial-gradient(circle at 72% 73%,#c5b1ff 0 1px,transparent 2px),radial-gradient(circle at 24% 68%,#adefff 0 1px,transparent 2px);background-size:530px 470px;opacity:.5;animation:star-drift 36s ease-in-out infinite alternate}
-.horizon-grid{position:absolute;left:-50%;right:-50%;height:55%;bottom:-22%;background-image:linear-gradient(#7de6ff33 1px,transparent 1px),linear-gradient(90deg,#a78bff33 1px,transparent 1px);background-size:80px 80px;transform:perspective(440px) rotateX(58deg);mask-image:linear-gradient(transparent,#000 55%);opacity:.75;animation:grid-run 5.5s linear infinite}
+/* The grid tile is one row taller than its frame and slides down by exactly
+   one row, so the loop is seamless. Moving the tile with a transform rather
+   than background-position keeps this a compositor-only animation. */
+.horizon-grid{position:absolute;left:-50%;right:-50%;height:55%;bottom:-22%;overflow:hidden;transform:perspective(440px) rotateX(58deg);mask-image:linear-gradient(transparent,#000 55%);-webkit-mask-image:linear-gradient(transparent,#000 55%);opacity:.75}
+.horizon-grid::before{content:"";position:absolute;inset:-80px 0 0;background-image:linear-gradient(#7de6ff33 1px,transparent 1px),linear-gradient(90deg,#a78bff33 1px,transparent 1px);background-size:80px 80px;will-change:transform;animation:grid-run 5.5s linear infinite}
 /* The lit edge where the grid meets the sky. */
 .horizon-line{position:absolute;left:0;right:0;bottom:27%;height:1px;background:linear-gradient(90deg,transparent,#5ff0ff9c 35%,#c08bff9c 65%,transparent);box-shadow:0 0 22px #3fd8ff66;opacity:.55;animation:horizon-pulse 9s ease-in-out infinite alternate}
 /* Scanlines, barely there: they read as a screen rather than a photograph. */
-.scan-lines{position:absolute;inset:0;background:repeating-linear-gradient(180deg,#9fe9ff0a 0 1px,transparent 1px 4px);mix-blend-mode:screen;opacity:.5;animation:scan-drift 7s linear infinite}
+.scan-lines{position:absolute;left:0;right:0;top:-4px;bottom:0;background:repeating-linear-gradient(180deg,#9fe9ff0c 0 1px,transparent 1px 4px);opacity:.5;animation:scan-drift 7s linear infinite}
 
 .motion-toggle{position:absolute;bottom:22px;right:48px;z-index:2;display:flex;align-items:center;gap:8px;padding:12px;min-height:44px;border:1px solid transparent;border-radius:6px;background:transparent;color:#a9a8bd;cursor:pointer;font-size:12px}
 .motion-toggle:hover{background:#ffffff08;color:#fff}
@@ -106,7 +124,7 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 /* One console panel holds every destination, with a hairline frame and two lit
    corners. It sits in the hero on purpose: a QR scan lands on the first screen
    and both destinations are already under the thumb, nothing to scroll for. */
-.link-stack{position:relative;max-width:560px;margin:40px auto 0;padding:20px;text-align:left;border:1px solid #cdc3ff26;border-radius:18px;background:linear-gradient(180deg,#191a33a8,#12132688);backdrop-filter:blur(18px);box-shadow:0 26px 64px #04040e73}
+.link-stack{position:relative;max-width:560px;margin:40px auto 0;padding:20px;text-align:left;border:1px solid #cdc3ff26;border-radius:18px;background:linear-gradient(180deg,#191a33e0,#121326d0);box-shadow:0 26px 64px #04040e73}
 .link-stack::before,.link-stack::after{content:"";position:absolute;width:18px;height:18px;border:0 solid var(--accent);opacity:.6;pointer-events:none}
 .link-stack::before{top:-1px;left:-1px;border-width:1px 0 0 1px;border-top-left-radius:18px}
 .link-stack::after{right:-1px;bottom:-1px;border-width:0 1px 1px 0;border-bottom-right-radius:18px}
@@ -139,18 +157,18 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 
 .section-band{position:relative;isolation:isolate;overflow:hidden}
 .section-band::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#a4a2e46b 30%,#90e3ef80 65%,transparent)}
-.section-band::after{content:"";position:absolute;top:0;left:-30%;width:30%;height:2px;background:linear-gradient(90deg,transparent,#c2bdff,transparent);box-shadow:0 0 16px #a6aaff;animation:chapter-trace 12s ease-in-out infinite;pointer-events:none}
+.section-band::after{content:"";position:absolute;top:0;left:-30%;width:30%;height:2px;background:linear-gradient(90deg,transparent,#c2bdff,transparent);box-shadow:0 0 16px #a6aaff;will-change:transform,opacity;animation:chapter-trace 12s ease-in-out infinite;pointer-events:none}
 .about-band{background:linear-gradient(130deg,#26223e,#1c2439)}
 .events-band{background:linear-gradient(135deg,#191d31,#252344 60%,#292443)}
 .team-band{background:linear-gradient(135deg,#192f3b,#222640 65%,#302544)}
 .faq-band{background:linear-gradient(140deg,#211f3c,#1a2135 60%,#241f3d)}
 .section-band>section{padding-top:100px;padding-bottom:105px;position:relative;z-index:1}
 .section-light{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
-.section-light span{position:absolute;width:70%;height:110%;top:-30%;left:-15%;background:radial-gradient(ellipse,#a477ff24,transparent 65%);filter:blur(30px);animation:chapter-aurora 19s ease-in-out infinite alternate}
+.section-light span{position:absolute;width:70%;height:110%;top:-30%;left:-15%;background:radial-gradient(ellipse,#a477ff24,transparent 65%);will-change:transform;animation:chapter-aurora 19s ease-in-out infinite alternate}
 .section-light span+span{left:55%;top:10%;background:radial-gradient(ellipse,#54cfe82a,transparent 65%);animation-delay:-10s;animation-direction:alternate-reverse}
 .events-band .section-light span{background:radial-gradient(ellipse,#9770ef30,transparent 65%)}
 .team-band .section-light span{background:radial-gradient(ellipse,#43c5cf2e,transparent 65%)}
-.about-band .section-light::after{content:"";position:absolute;width:680px;height:680px;right:-390px;top:-140px;border:1px solid #a8bfff25;border-radius:50%;box-shadow:0 0 0 70px #b8a7ff08,0 0 0 140px #b8a7ff05;animation:chapter-aurora 22s ease-in-out infinite alternate}
+.about-band .section-light::after{content:"";position:absolute;width:680px;height:680px;right:-390px;top:-140px;border:1px solid #a8bfff25;border-radius:50%;box-shadow:0 0 0 70px #b8a7ff08,0 0 0 140px #b8a7ff05;will-change:transform;animation:chapter-aurora 22s ease-in-out infinite alternate}
 
 /* ----------------------------------------------------------------- about */
 
@@ -174,13 +192,13 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
    does not involve the OpenAI blossom: that mark is used under permission and
    must not be rotated, recoloured, or animated. */
 .about-figure{position:relative;height:250px;max-width:720px;margin:52px auto 0;pointer-events:none}
-.figure-glow{position:absolute;left:50%;top:50%;width:340px;height:340px;translate:-50% -50%;border-radius:50%;background:radial-gradient(circle,#a487ff4a 0%,#63c4ea26 44%,transparent 70%);filter:blur(30px);animation:figure-breathe 16s ease-in-out infinite alternate}
+.figure-glow{position:absolute;left:50%;top:50%;width:340px;height:340px;translate:-50% -50%;border-radius:50%;background:radial-gradient(circle,#a487ff4a 0%,#63c4ea26 40%,#63c4ea0d 58%,transparent 72%);will-change:transform,opacity;animation:figure-breathe 16s ease-in-out infinite alternate}
 .figure-rings{position:absolute;inset:0;display:grid;place-items:center;perspective:900px}
 /* The rings themselves hold still and only the highlight travels. Animating the
    ring transforms would converge them on a single shared keyframe and stack the
    three ellipses on top of each other. */
 .figure-rings span{position:absolute;width:min(580px,100%);aspect-ratio:1;border-radius:50%;border:1px solid #b5adff4d;box-shadow:0 0 26px #7a5cff26,inset 0 0 34px #7a5cff1a;transform:rotateX(76deg)}
-.figure-rings span::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1px solid transparent;border-top-color:#8fe6ff;filter:drop-shadow(0 0 7px #6fcaff);animation:orbit-travel 19s linear infinite}
+.figure-rings span::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1px solid transparent;border-top-color:#8fe6ff;filter:drop-shadow(0 0 7px #6fcaff);will-change:transform;animation:orbit-travel 19s linear infinite}
 .figure-rings span:nth-child(2){width:min(430px,72%);transform:rotateX(73deg) rotateZ(20deg)}
 .figure-rings span:nth-child(2)::after{border-top-color:#c3a2ff;animation-duration:26s;animation-direction:reverse;animation-delay:-9s}
 .figure-rings span:nth-child(3){width:min(260px,44%);transform:rotateX(69deg) rotateZ(-24deg);opacity:.85}
@@ -278,11 +296,11 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 .reveal-pending{opacity:0;transform:translateY(20px)}
 .reveal-pending:focus-within{opacity:1;transform:none}
 [data-motion="paused"] [data-reveal]{transition:none;opacity:1;transform:none}
-[data-motion="paused"] .atmosphere,[data-motion="paused"] .atmosphere *,[data-motion="paused"] .atmosphere *::after,
+[data-motion="paused"] .atmosphere,[data-motion="paused"] .atmosphere *,[data-motion="paused"] .atmosphere *::after,[data-motion="paused"] .atmosphere *::before,
 [data-motion="paused"] .section-band::after,[data-motion="paused"] .section-light *,
 [data-motion="paused"] .section-light::after,
 [data-motion="paused"] .about-figure *,[data-motion="paused"] .about-figure *::after,
-html:not([data-motion]) .atmosphere,html:not([data-motion]) .atmosphere *,html:not([data-motion]) .atmosphere *::after,
+html:not([data-motion]) .atmosphere,html:not([data-motion]) .atmosphere *,html:not([data-motion]) .atmosphere *::after,html:not([data-motion]) .atmosphere *::before,
 html:not([data-motion]) .section-band::after,html:not([data-motion]) .section-light *,
 html:not([data-motion]) .section-light::after,
 html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *::after{animation-play-state:paused}
@@ -294,13 +312,13 @@ html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *:
 @keyframes orbit-travel{to{transform:rotate(360deg)}}
 @keyframes orbit-drift{to{transform:rotateX(57deg) rotateY(14deg) rotateZ(16deg)}}
 @keyframes star-drift{to{transform:translate3d(18px,-24px,0)}}
-@keyframes grid-run{to{background-position:0 80px,0 0}}
+@keyframes grid-run{to{transform:translateY(80px)}}
 @keyframes horizon-pulse{0%{opacity:.35}100%{opacity:.75}}
-@keyframes scan-drift{to{background-position:0 4px}}
-@keyframes sky-shift{to{filter:hue-rotate(26deg) saturate(1.12)}}
+@keyframes scan-drift{to{transform:translateY(4px)}}
+@keyframes sky-shift{to{opacity:.16}}
 @keyframes chapter-aurora{to{transform:translate3d(15%,14%,0) scale(1.18)}}
 @keyframes figure-breathe{to{transform:scale(1.14);opacity:.72}}
-@keyframes chapter-trace{0%,20%{left:-30%;opacity:0}30%{opacity:1}75%,100%{left:100%;opacity:0}}
+@keyframes chapter-trace{0%,20%{transform:translateX(0);opacity:0}30%{opacity:1}75%,100%{transform:translateX(433.4%);opacity:0}}
 
 /* ----------------------------------------------------------- wide screens */
 
@@ -393,7 +411,7 @@ html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *:
   .perk-tag{font-size:13px}
   .perk>p:last-child{font-size:15px}
   .about-figure{height:190px;margin-top:40px}
-  .figure-glow{width:260px;height:260px;filter:blur(24px)}
+  .figure-glow{width:260px;height:260px}
   .faq-list{margin-top:32px}
   .faq summary{font-size:16px;gap:16px;padding:18px 2px}
   .faq details > p{font-size:15px;padding:0 30px 20px 2px}
