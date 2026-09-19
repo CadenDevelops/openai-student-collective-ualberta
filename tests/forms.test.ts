@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   makeForm,
   validateDefinition,
+  validateSlug,
   validateAnswers,
   isOpen,
   csvCell,
@@ -91,4 +92,25 @@ test("background settings are validated and older forms get defaults", () => {
  assert.throws(()=>validateDefinition({...f,background:"invalid"}));
  assert.equal(validateDefinition({...f,background:undefined,animated:undefined}).background,"aurora");
  assert.equal(validateDefinition({...f,animated:false}).animated,false);
+});
+
+test("custom links are lowercased and cannot shadow a form id or a route", () => {
+  assert.equal(validateSlug("  Fall-Kickoff  "), "fall-kickoff");
+  assert.equal(validateSlug("check_in_2026"), "check_in_2026");
+  for (const bad of [
+    "ab",                                     // under three characters
+    "-leading",                               // must start alphanumeric
+    "trailing-",                              // must end alphanumeric
+    "has space",
+    "has/slash",
+    "Ünicode",
+    "f",                                      // reserved route word
+    "forms",
+    "responses",
+    "a".repeat(49),                           // over the length ceiling
+    "3f2504e0-4f89-11d3-9a0c-0305e82c3301",   // shaped like a document id
+  ])
+    assert.throws(() => validateSlug(bad), Error, `expected ${bad} to be rejected`);
+  assert.throws(() => validateSlug(""), Error);
+  assert.throws(() => validateSlug(null), Error);
 });

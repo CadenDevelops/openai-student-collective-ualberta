@@ -127,6 +127,24 @@ export function Dashboard({ email }: { email: string }) {
       setBusy(false);
     }
   }
+  async function removeForm() {
+    if (!selected) return;
+    if (!window.confirm(`Permanently delete “${selected.title}”, its ${selected.count} response${selected.count === 1 ? "" : "s"} and its saved versions? This cannot be undone, and its shared links and QR codes will stop working.`)) return;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await api(`forms/${selected.id}`, "DELETE", { confirmation: "DELETE FORM" });
+      setForms((f) => f.filter((x) => x.id !== selected.id));
+      setSelected(null);
+      setDirty(false);
+      setNotice("Form deleted.");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
   async function removeAllForms() {
     if (!window.confirm("Permanently delete ALL forms, responses, and saved versions? This cannot be undone. Shared form links will stop working.")) return;
     setBusy(true);
@@ -227,6 +245,9 @@ export function Dashboard({ email }: { email: string }) {
                 <button className="action" disabled={busy} onClick={duplicate}>
                   Duplicate
                 </button>
+                <button className="action danger" disabled={busy} onClick={removeForm}>
+                  Delete form
+                </button>
                 <button
                   className="action primary"
                   disabled={busy || !dirty}
@@ -257,7 +278,14 @@ export function Dashboard({ email }: { email: string }) {
                 preview
               />
             ) : tab === "share" ? (
-              <Share form={selected} dirty={dirty} />
+              <Share
+                form={selected}
+                dirty={dirty}
+                onSlug={(slug) => {
+                  setSelected((f) => (f ? { ...f, slug } : f));
+                  setForms((all) => all.map((f) => (f.id === selected.id ? { ...f, slug } : f)));
+                }}
+              />
             ) : (
               <Responses key={selected.id} form={selected} />
             )}
@@ -646,12 +674,21 @@ function Editor({
     </fieldset>
   );
 }
-function Share({ form, dirty }: { form: FormDefinition; dirty: boolean }) {
+function Share({ form, dirty, onSlug }: { form: FormDefinition; dirty: boolean; onSlug: (slug: string | null) => void }) {
   const [qr, setQr] = useState("");
   const [copied, setCopied] = useState("");
   const [url, setUrl] = useState("");
+  const [slug, setSlug] = useState(form.slug ?? "");
+  const [check, setCheck] = useState<{ state: "idle" | "checking" | "free" | "taken"; reason: string }>({ state: "idle", reason: "" });
+  const [savingSlug, setSavingSlug] = useState(false);
+  const [slugNotice, setSlugNotice] = useState("");
+  const saved = form.slug ?? "";
+  const cleaned = slug.trim().toLowerCase();
+  useEffect(() => { setSlug(form.slug ?? ""); setSlugNotice(""); setCheck({ state: "idle", reason: "" }); }, [form.id, form.slug]);
   useEffect(() => {
-    const u = `${window.location.origin}/f/${form.id}`;
+    // The link the lead will actually hand out: the custom one once it is
+    // saved, so the QR code and the copy button never disagree with it.
+    const u = `${window.location.origin}/f/${form.slug || form.id}`;
     setUrl(u);
     QRCode.toDataURL(u, {
       width: 960,
@@ -661,11 +698,39 @@ function Share({ form, dirty }: { form: FormDefinition; dirty: boolean }) {
     })
       .then(setQr)
       .catch(() => setCopied("Could not generate the QR code."));
-  }, [form.id]);
+  }, [form.id, form.slug]);
+  useEffect(() => {
+    // Availability as you type. The claim on save is transactional, so this
+    // only ever saves the lead a round trip; it is never the check that counts.
+    if (!cleaned || cleaned === saved) { setCheck({ state: "idle", reason: "" }); return; }
+    setCheck({ state: "checking", reason: "" });
+    const t = setTimeout(async () => {
+      try {
+        const d = await api(`slugs/${encodeURIComponent(cleaned)}?form=${form.id}`);
+        setCheck({ state: d.available ? "free" : "taken", reason: d.reason ?? "" });
+      } catch {
+        setCheck({ state: "idle", reason: "" });
+      }
+    }, 350);
+    return () => clearTimeout(t);
+  }, [cleaned, saved, form.id]);
+  async function saveSlug(next: string | null) {
+    setSavingSlug(true);
+    setSlugNotice("");
+    try {
+      const d = await api(`forms/${form.id}`, "POST", { action: "slug", slug: next });
+      onSlug(d.slug);
+      setSlugNotice(d.slug ? "Custom link saved." : "Custom link removed.");
+      setCheck({ state: "idle", reason: "" });
+    } catch (e) {
+      setCheck({ state: "taken", reason: (e as Error).message });
+    } finally {
+      setSavingSlug(false);
+    }
+  }
   return (
     <section className="panel share-panel">
       <div>
-        
         <h2>Share form</h2>
         <p className="muted">
           Copy the link or download the QR code.
@@ -704,6 +769,58 @@ function Share({ form, dirty }: { form: FormDefinition; dirty: boolean }) {
         <p role="status" className="small">
           {copied}
         </p>
+        <div className="slug-editor">
+          <h3>Custom link</h3>
+          <p className="muted small">
+            Give the form readable wording instead of its id. The old link keeps working.
+          </p>
+          <label>
+            Link ending
+            <span className="slug-input">
+              <span className="slug-prefix">/f/</span>
+              <input
+                value={slug}
+                spellCheck={false}
+                autoCapitalize="none"
+                placeholder="fall-kickoff"
+                maxLength={48}
+                onChange={(e) => { setSlug(e.target.value); setSlugNotice(""); }}
+              />
+            </span>
+          </label>
+          <p role="status" className={`small ${check.state === "taken" ? "error" : ""}`}>
+            {check.state === "checking"
+              ? "Checking availability"
+              : check.state === "free"
+                ? `/f/${cleaned} is available.`
+                : check.state === "taken"
+                  ? check.reason
+                  : slugNotice}
+          </p>
+          <div className="actions">
+            <button
+              className="action primary"
+              disabled={savingSlug || !cleaned || cleaned === saved || check.state === "taken" || check.state === "checking"}
+              onClick={() => saveSlug(cleaned)}
+            >
+              {savingSlug ? "Saving" : saved ? "Update link" : "Save link"}
+            </button>
+            {saved && (
+              <button
+                className="action danger"
+                disabled={savingSlug}
+                onClick={() => {
+                  if (window.confirm(`Remove /f/${saved}? Anything already sharing that link will stop working.`)) {
+                    setSlug("");
+                    saveSlug(null);
+                  }
+                }}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
       </div>
       <div className="qr-card">
         {qr && (
@@ -714,7 +831,7 @@ function Share({ form, dirty }: { form: FormDefinition; dirty: boolean }) {
               height="240"
               alt={`QR code linking to ${form.title}`}
             />
-            <a className="action" href={qr} download={`${form.id}-qr.png`}>
+            <a className="action" href={qr} download={`${form.slug || form.id}-qr.png`}>
               Download QR code
             </a>
           </>
@@ -736,6 +853,24 @@ function Responses({ form }: { form: FormDefinition }) {
   const [columns, setColumns] = useState<string[]>(
     form.fields.slice(0, 4).map((f) => f.id),
   );
+  async function removeResponse(r: Submission) {
+    const who = r.answers.name ? `the response from ${answer(r.answers.name)}` : "this response";
+    if (!window.confirm(`Permanently delete ${who}, submitted ${date(r.createdAt)}? This cannot be undone.`)) return;
+    setBusy(true);
+    setError("");
+    try {
+      await api(`forms/${form.id}/responses/${r.id}`, "DELETE");
+      // Trust the local edit rather than reloading: a refetch would reshuffle
+      // the cursor and drop every page the lead has already loaded.
+      setRows((all) => all.filter((x) => x.id !== r.id));
+      setTotal((t) => Math.max(0, t - 1));
+      setDetail((d) => (d?.id === r.id ? null : d));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
   async function load(more = false) {
     setBusy(true);
     setError("");
@@ -972,13 +1107,26 @@ function Responses({ form }: { form: FormDefinition }) {
                           <td key={f.id}>{answer(r.answers[f.id])}</td>
                         ))}
                       <td>
-                        <button onClick={() => setDetail(r)}>
-                          View
-                          <span className="sr-only">
-                            {" "}
-                            response from {date(r.createdAt)}
-                          </span>
-                        </button>
+                        <span className="row-actions">
+                          <button onClick={() => setDetail(r)}>
+                            View
+                            <span className="sr-only">
+                              {" "}
+                              response from {date(r.createdAt)}
+                            </span>
+                          </button>
+                          <button
+                            className="row-delete"
+                            disabled={busy}
+                            onClick={() => removeResponse(r)}
+                          >
+                            Delete
+                            <span className="sr-only">
+                              {" "}
+                              response from {date(r.createdAt)}
+                            </span>
+                          </button>
+                        </span>
                       </td>
                     </tr>
                   ))}
@@ -1012,16 +1160,20 @@ function Responses({ form }: { form: FormDefinition }) {
           </button>
         )}
       </section>
-      {detail && <ResponseDetail row={detail} close={() => setDetail(null)} />}
+      {detail && <ResponseDetail row={detail} close={() => setDetail(null)} remove={() => removeResponse(detail)} busy={busy} />}
     </>
   );
 }
 function ResponseDetail({
   row,
   close,
+  remove,
+  busy,
 }: {
   row: Submission;
   close: () => void;
+  remove: () => void;
+  busy: boolean;
 }) {
   useEffect(() => {
     const d = document.getElementById("response-detail") as HTMLDialogElement;
@@ -1039,6 +1191,9 @@ function ResponseDetail({
     >
       <div className="list-heading">
         <h2>Response details</h2>
+        <button className="action danger" disabled={busy} onClick={remove}>
+          Delete response
+        </button>
         <button autoFocus onClick={close} aria-label="Close response details">
           Close ×
         </button>
