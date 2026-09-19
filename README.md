@@ -48,12 +48,18 @@ content are included in the website.
 
 ## Hosting and future backend
 
-Production: https://openai-student-collective-ualberta.vercel.app
+Production: https://studentcollectiveualberta.com
 
-The GitHub repository is connected to Vercel. Pushes to `redesign/quiet-landing`
-automatically deploy to production. The `main` branch retains the earlier static
-site. For an explicit local deployment, run `npx vercel deploy --prod`.
-The linked Vercel project is
+The domain is registered at Porkbun and its nameservers point at Vercel, which
+serves both the apex and `www` and issues the certificates. The canonical origin
+is exported once as `siteUrl` in `src/content/collective.ts`; link previews, the
+Discord webhook avatar and the form links shared into Discord all read it from
+there, so a future domain change is a single line.
+
+Deployment is manual, from a checkout: run `npx vercel deploy --prod`. There is
+no GitHub integration on this project, so pushing a branch does not publish
+anything. The `main` branch still holds the earlier static site, on an unrelated
+history. The linked Vercel project is
 `caden9036-5252s-projects/openai-student-collective-ualberta`.
 
  The old GitHub Pages setup serves static HTML and cannot run the

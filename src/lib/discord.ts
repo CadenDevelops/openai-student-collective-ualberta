@@ -1,5 +1,6 @@
+import { siteUrl } from "../content/collective";
 export const DISCORD_NAME = "OpenAI Student Collective at UAlberta";
-export const DISCORD_AVATAR_URL = "https://openai-student-collective-ualberta.vercel.app/collective-logo.png";
+export const DISCORD_AVATAR_URL = `${siteUrl}/collective-logo.png`;
 export type EmbedField = { name:string; value:string; inline:boolean };
 export type EmbedDraft = { title:string; description:string; url:string; color:string; authorName:string; authorUrl:string; authorIcon:string; thumbnail:string; image:string; footer:string; footerIcon:string; timestamp:boolean; fields:EmbedField[] };
 export type DiscordDraft = { mode:"message"|"embed"; content:string; embed:EmbedDraft };
