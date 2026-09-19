@@ -1,10 +1,12 @@
-import { deleteAllForms } from "@/lib/delete-forms";
+import { deleteAllForms, deleteForm, deleteResponse } from "@/lib/delete-forms";
+import { setFormSlug, slugAvailable } from "@/lib/slugs";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/firebase-admin";
 import { body, checkOrigin, lead } from "@/lib/auth";
 import {
   makeForm,
   validateDefinition,
+  validateSlug,
   csvCell,
   type FormDefinition,
   type Submission,
@@ -16,6 +18,22 @@ export async function GET(req: Request, ctx: Context) {
     return Response.json({ error: "Sign in to continue." }, { status: 401 });
   const { path } = await ctx.params;
   try {
+    // Checked as the lead types, so a taken link is caught before saving.
+    // The claim on save is still transactional; this is only for the message.
+    if (path[0] === "slugs" && path.length === 2) {
+      const url = new URL(req.url);
+      let slug: string;
+      try {
+        slug = validateSlug(path[1]);
+      } catch (e) {
+        return Response.json({ available: false, reason: (e as Error).message });
+      }
+      const free = await slugAvailable(db(), slug, url.searchParams.get("form") ?? "");
+      return Response.json({
+        available: free,
+        reason: free ? "" : "That link is already taken. Try another.",
+      });
+    }
     if (path[0] !== "forms") return new Response(null, { status: 404 });
     if (!path[1]) {
       const s = await db()
@@ -124,6 +142,11 @@ export async function POST(req: Request, ctx: Context) {
         .set({ ...f, createdBy: user.uid, updatedBy: user.uid });
       return Response.json({ form: { ...f, id } });
     }
+    if (input.action === "slug") {
+      const slug = input.slug === null || input.slug === "" ? null : validateSlug(input.slug);
+      await setFormSlug(db(), path[1], slug);
+      return Response.json({ slug });
+    }
     if (input.action === "duplicate") {
       const old = await db().collection("forms").doc(path[1]).get();
       if (!old.exists) throw new Error("Form not found.");
@@ -195,15 +218,43 @@ export async function PUT(req: Request, ctx: Context) {
 
 export async function DELETE(req: Request, ctx: Context) {
   if (!(await lead())) return Response.json({ error: "Sign in to continue." }, { status: 401 });
+  const { path } = await ctx.params;
+  if (path[0] !== "forms") return new Response(null, { status: 404 });
   try {
     checkOrigin(req);
-    const { path } = await ctx.params;
-    if (path.length !== 1 || path[0] !== "forms") return new Response(null, { status: 404 });
-    const input = await body(req);
-    if (input.confirmation !== "DELETE ALL FORMS") return Response.json({ error: "Confirm deletion of all forms." }, { status: 400 });
-    const deleted = await deleteAllForms(db());
-    return Response.json({ deleted });
-  } catch {
-    return Response.json({ error: "Deletion did not finish. Refresh and try again to remove remaining forms." }, { status: 500 });
+    // One response: forms/<id>/responses/<responseId>
+    if (path.length === 4 && path[2] === "responses") {
+      await deleteResponse(db(), path[1], path[3]);
+      return Response.json({ deleted: 1 });
+    }
+    // One form: forms/<id>
+    if (path.length === 2) {
+      const input = await body(req);
+      if (input.confirmation !== "DELETE FORM")
+        return Response.json({ error: "Confirm deletion of this form." }, { status: 400 });
+      const ref = db().collection("forms").doc(path[1]);
+      if (!(await ref.get()).exists)
+        return Response.json({ error: "Form not found." }, { status: 404 });
+      await deleteForm(db(), ref);
+      return Response.json({ deleted: 1 });
+    }
+    // Every form: forms
+    if (path.length === 1) {
+      const input = await body(req);
+      if (input.confirmation !== "DELETE ALL FORMS")
+        return Response.json({ error: "Confirm deletion of all forms." }, { status: 400 });
+      return Response.json({ deleted: await deleteAllForms(db()) });
+    }
+    return new Response(null, { status: 404 });
+  } catch (e) {
+    // A response delete reports its own reason; the recursive deletes cannot
+    // say how far they reached, so they ask for a retry instead.
+    const message =
+      path.length === 4
+        ? e instanceof Error
+          ? e.message
+          : "Could not delete that response."
+        : "Deletion did not finish. Refresh and try again to remove what is left.";
+    return Response.json({ error: message }, { status: path.length === 4 ? 400 : 500 });
   }
 }

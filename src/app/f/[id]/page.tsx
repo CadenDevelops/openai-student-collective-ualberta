@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { db, configured } from "@/lib/firebase-admin";
+import { findForm } from "@/lib/slugs";
 import { isOpen, validateDefinition, type FormDefinition } from "@/lib/forms";
 import { PublicForm } from "@/components/leads/public-form";
 
@@ -17,11 +18,14 @@ export default async function Page({
   const { id } = await params;
   let form: FormDefinition | null = null;
   if (configured()) {
-    const d = await db().collection("forms").doc(id).get();
-    if (d.exists && d.data()?.status !== "draft")
+    // The segment is either a document id or a custom link. Either way the
+    // form carries its real id from here on, so submissions reach the right
+    // document whichever way the visitor arrived.
+    const d = await findForm(db(), id);
+    if (d && d.data()?.status !== "draft")
       form = {
         ...validateDefinition(d.data()),
-        id,
+        id: d.id,
         version: d.data()!.version,
         count: 0,
         createdAt: "",

@@ -22,6 +22,9 @@ export type FormDefinition = {
   createdAt: string;
   updatedAt: string;
   count: number;
+  /** Optional custom link segment. Null or absent means the form is only
+      reachable at its document id. */
+  slug?: string | null;
 };
 export type Submission = {
   id: string;
@@ -309,6 +312,29 @@ export function validateAnswers(fields: Field[], value: unknown) {
   }
   return answers;
 }
+/* Words that already mean something in a URL, or that a lead would expect to
+   land somewhere else. Claiming these as form links would be confusing at
+   best and would shadow a real route at worst. */
+const reservedSlugs = new Set(["f", "form", "forms", "new", "edit", "preview", "share", "responses", "response", "qr", "discord", "leads", "lead", "login", "logout", "admin", "api", "index", "null", "undefined"]);
+
+/** Validates a custom link segment for /f/<slug>.
+
+    Deliberately narrower than the document ids it shares a path with: a slug
+    must not be able to look like a UUID, so one route can resolve both without
+    a form ever being shadowed by somebody's chosen wording. */
+export function validateSlug(value: unknown) {
+  if (typeof value !== "string" || !value.trim())
+    throw new Error("Enter a custom link.");
+  const slug = value.trim().toLowerCase();
+  if (!/^[a-z0-9](?:[a-z0-9_-]{1,46})[a-z0-9]$/.test(slug))
+    throw new Error("Use 3 to 48 characters: lowercase letters, numbers, hyphens and underscores, starting and ending with a letter or number.");
+  if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(slug))
+    throw new Error("That looks like a form id. Choose different wording.");
+  if (reservedSlugs.has(slug))
+    throw new Error("That word is reserved. Choose another.");
+  return slug;
+}
+
 export function csvCell(value: unknown) {
   let s = Array.isArray(value) ? value.join("; ") : String(value ?? "");
   if (/^[\s]*[=+@-]/.test(s)) s = "'" + s;
