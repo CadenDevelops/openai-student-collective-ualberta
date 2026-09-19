@@ -6,6 +6,7 @@ import {
   normalizeDiscordMessage,
   validateDiscordWebhookUrl,
 } from "@/lib/discord";
+import { brandWebhook } from "@/lib/discord-webhook";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +82,28 @@ export async function POST(req: Request) {
         },
         { merge: true },
       );
-      return Response.json({ configured: true });
+      // Best effort, and reported rather than thrown: the webhook is saved and
+      // usable either way, and messages carry the logo regardless.
+      return Response.json({ configured: true, branded: await brandWebhook(url) });
+    }
+
+    // Re-applies the name and picture, for a webhook connected before this
+    // existed or one somebody renamed inside Discord.
+    if (input.action === "brand") {
+      const snap = await settings().get();
+      const saved = snap.data();
+      if (!snap.exists || !configuredFrom(saved))
+        return Response.json(
+          { error: "Connect a Discord webhook first." },
+          { status: 409 },
+        );
+      const branded = await brandWebhook(saved!.webhookUrl as string);
+      if (!branded)
+        return Response.json(
+          { error: "Discord did not accept the picture. Check the webhook and try again." },
+          { status: 502 },
+        );
+      return Response.json({ branded });
     }
 
     if (input.action !== "send") {
