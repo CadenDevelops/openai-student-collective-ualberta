@@ -2,6 +2,16 @@ import { Atmosphere, ScrollReveals } from "@/components/atmosphere";
 import { Arrow, SocialIcon } from "@/components/icons";
 import { collective, externalUrl } from "@/content/collective";
 
+/** Renders the one inline [text](https://…) link an answer may carry. Kept
+    this small on purpose: the content file stays readable without pulling a
+    Markdown parser in for seventeen sentences. */
+function Answer({ text }: { text: string }) {
+  // [\s\S] rather than the dotAll flag, which this tsconfig target rules out.
+  const m = /^([\s\S]*?)\[([^\]]+)\]\((https:\/\/[^)]+)\)([\s\S]*)$/.exec(text);
+  if (!m) return <p>{text}</p>;
+  return <p>{m[1]}<a href={m[3]}>{m[2]}</a>{m[4]}</p>;
+}
+
 function Brand({ footer = false }: { footer?: boolean }) {
   return <a className={`brand${footer ? " brand-footer" : ""}`} href="#top" aria-label="OpenAI Student Collective, back to top">
     <img className="brand-logo" src="/collective-mark.png" width="40" height="40" alt="" />
@@ -119,6 +129,23 @@ export default function Home() {
                 </li>)}</ul>
               </div>
             </div>
+          </section>
+          </div>
+          <div className="section-band faq-band">
+            <div className="section-light" aria-hidden="true"><span/><span/></div>
+          <section id="faq" className="faq content-shell" aria-labelledby="faq-title">
+            <div data-reveal>
+              <p className="eyebrow">Before you come</p>
+              <h2 id="faq-title">Frequently asked questions</h2>
+            </div>
+            <ul className="faq-list">
+              {collective.faq.map((item) => <li key={item.q}>
+                <details>
+                  <summary><span>{item.q}</span><span className="faq-mark" aria-hidden="true" /></summary>
+                  <Answer text={item.a} />
+                </details>
+              </li>)}
+            </ul>
           </section>
           </div>
         </div>
