@@ -210,14 +210,6 @@ A pass over the landing page, September 15, 2026:
 - The atmosphere is pinned to the hero's own box rather than to a fixed height,
   so the first screen can grow with what it holds and the background always
   ends where the hero does.
-- `.about-figure` closes the About section: three tilted CSS rings with
-  travelling highlights, echoing the hero's orbital motif. It is decorative,
-  so it is `aria-hidden` and carries no text, and it honours the pause control
-  and `prefers-reduced-motion` like the rest of the page. It deliberately does
-  not involve the OpenAI blossom ; that mark is used under permission and should
-  not be rotated, recoloured, or animated. The rings hold still and only the
-  highlight travels; animating the ring transforms would converge all three on a
-  shared keyframe and stack them on top of each other.
 - Running prose in the About section is left-aligned inside a centred column;
   only the eyebrow and heading stay centred.
 - The dock sits in `.connect-band`, whose gradient fades into the first chapter,

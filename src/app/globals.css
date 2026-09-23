@@ -46,11 +46,11 @@ a:hover .arrow:not(.arrow-down){transform:translate(2px,-2px)}
    listener. No backdrop blur: blurring the moving sky behind it would repaint
    the first screen every frame. Browsers without scroll timelines get the
    solid bar throughout. */
-.site-header{position:fixed;top:0;left:0;right:0;z-index:5;padding:18px 0;background:#10111ff2;border-bottom:1px solid var(--line)}
+.site-header{position:fixed;top:0;left:0;right:0;z-index:5;padding:18px 0;background:#10111f;border-bottom:1px solid var(--line)}
 @supports (animation-timeline:scroll()){
   .site-header{animation:header-solid linear both;animation-timeline:scroll(root);animation-range:0 180px}
 }
-@keyframes header-solid{from{background:#10111f00;border-bottom-color:#ffffff00}to{background:#10111ff2;border-bottom-color:#dce0ff21}}
+@keyframes header-solid{from{background:#10111f00;border-bottom-color:#ffffff00}to{background:#10111f;border-bottom-color:#dce0ff21}}
 .header-inner{display:flex;align-items:center;gap:28px}
 .site-nav{display:flex;gap:6px;margin-left:auto}
 .site-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:8px;font-size:14px;color:#cfcae0;transition:color .2s,background .2s}
@@ -211,22 +211,6 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 .program-link{display:inline-flex;align-items:center;gap:10px;font-size:14px;color:#ded4ff;margin-top:22px;min-height:44px}
 .program-link:hover{text-decoration:underline;text-underline-offset:5px}
 
-/* A contained echo of the hero's orbital motif, closing the About section.
-   Purely decorative, so it is aria-hidden and carries no text. It deliberately
-   does not involve the OpenAI blossom: that mark is used under permission and
-   must not be rotated, recoloured, or animated. */
-.about-figure{position:relative;height:250px;max-width:720px;margin:52px auto 0;pointer-events:none}
-.figure-glow{position:absolute;left:50%;top:50%;width:340px;height:340px;translate:-50% -50%;border-radius:50%;background:radial-gradient(circle,#a487ff4a 0%,#63c4ea26 40%,#63c4ea0d 58%,transparent 72%);will-change:transform,opacity;animation:figure-breathe 16s ease-in-out infinite alternate}
-.figure-rings{position:absolute;inset:0;display:grid;place-items:center;perspective:900px}
-/* The rings themselves hold still and only the highlight travels. Animating the
-   ring transforms would converge them on a single shared keyframe and stack the
-   three ellipses on top of each other. */
-.figure-rings span{position:absolute;width:min(580px,100%);aspect-ratio:1;border-radius:50%;border:1px solid #b5adff4d;box-shadow:0 0 26px #7a5cff26,inset 0 0 34px #7a5cff1a;transform:rotateX(76deg)}
-.figure-rings span::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1px solid transparent;border-top-color:#8fe6ff;filter:drop-shadow(0 0 7px #6fcaff);will-change:transform;animation:orbit-travel 19s linear infinite}
-.figure-rings span:nth-child(2){width:min(430px,72%);transform:rotateX(73deg) rotateZ(20deg)}
-.figure-rings span:nth-child(2)::after{border-top-color:#c3a2ff;animation-duration:26s;animation-direction:reverse;animation-delay:-9s}
-.figure-rings span:nth-child(3){width:min(260px,44%);transform:rotateX(69deg) rotateZ(-24deg);opacity:.85}
-.figure-rings span:nth-child(3)::after{border-top-color:#ffd6a5;animation-duration:14s;animation-delay:-5s}
 
 /* ---------------------------------------------------------------- events */
 
@@ -362,21 +346,17 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 [data-motion="paused"] .atmosphere,[data-motion="paused"] .atmosphere *,[data-motion="paused"] .atmosphere *::after,[data-motion="paused"] .atmosphere *::before,
 [data-motion="paused"] .section-band::after,[data-motion="paused"] .section-light *,
 [data-motion="paused"] .section-light::after,
-[data-motion="paused"] .about-figure *,[data-motion="paused"] .about-figure *::after,
 html:not([data-motion]) .atmosphere,html:not([data-motion]) .atmosphere *,html:not([data-motion]) .atmosphere *::after,html:not([data-motion]) .atmosphere *::before,
 html:not([data-motion]) .section-band::after,html:not([data-motion]) .section-light *,
-html:not([data-motion]) .section-light::after,
-html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *::after{animation-play-state:paused}
+html:not([data-motion]) .section-light::after{animation-play-state:paused}
 
 /* Parts of the page scrolled out of view (OffscreenPause) drop their
    decorative layers entirely: hidden layers are not composited and their
    promoted textures can be released, and paused animations stop ticking. */
 .hero[data-offscreen] .atmosphere,
-.section-band[data-offscreen] .section-light,
-.section-band[data-offscreen] .about-figure{visibility:hidden}
+.section-band[data-offscreen] .section-light{visibility:hidden}
 .hero[data-offscreen] .atmosphere *,.hero[data-offscreen] .atmosphere *::after,.hero[data-offscreen] .atmosphere *::before,
-.section-band[data-offscreen]::after,.section-band[data-offscreen] .section-light *,.section-band[data-offscreen] .section-light::after,
-.section-band[data-offscreen] .about-figure *,.section-band[data-offscreen] .about-figure *::after{animation-play-state:paused;will-change:auto}
+.section-band[data-offscreen]::after,.section-band[data-offscreen] .section-light *,.section-band[data-offscreen] .section-light::after{animation-play-state:paused;will-change:auto}
 
 @keyframes arrive{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes drift-violet{0%{transform:translate(-10%,-8%) scale(.93) rotate(-12deg)}50%{transform:translate(10%,5%) scale(1.12) rotate(8deg)}100%{transform:translate(-6%,16%) scale(1.04) rotate(-5deg)}}
@@ -390,7 +370,6 @@ html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *:
 @keyframes scan-drift{to{transform:translateY(4px)}}
 @keyframes sky-shift{to{opacity:.16}}
 @keyframes chapter-aurora{to{transform:translate3d(15%,14%,0) scale(1.18)}}
-@keyframes figure-breathe{to{transform:scale(1.14);opacity:.72}}
 @keyframes chapter-trace{0%,20%{transform:translateX(0);opacity:0}30%{opacity:1}75%,100%{transform:translateX(433.4%);opacity:0}}
 
 /* ----------------------------------------------------------- wide screens */
@@ -486,8 +465,6 @@ html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *:
   .perk{padding:17px 18px;margin-top:26px}
   .perk-tag{font-size:13px}
   .perk>p:last-child{font-size:15px}
-  .about-figure{height:190px;margin-top:40px}
-  .figure-glow{width:260px;height:260px}
   .faq-list{margin-top:32px}
   .faq summary{font-size:16px;gap:16px;padding:18px 2px}
   .faq details > p{font-size:15px;padding:0 30px 20px 2px}

@@ -116,10 +116,6 @@ export default async function Home() {
                   <a className="program-link" href="https://openai.com/student-collective/">About the program at OpenAI <Arrow /></a>
                 </div>
               </div>
-              <div className="about-figure" aria-hidden="true">
-                <div className="figure-glow" />
-                <div className="figure-rings"><span /><span /><span /></div>
-              </div>
             </div>
           </section>
           </div>
