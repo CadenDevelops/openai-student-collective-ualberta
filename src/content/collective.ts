@@ -11,6 +11,11 @@ export const collective = {
     discord: "https://discord.gg/QzJvjYhubp",
     luma: "https://luma.com/openai-collective-ualberta",
   },
+  // The "Stay up to date" form built in the leads workspace. A site path, so
+  // it is linked directly rather than through externalUrl.
+  interestForm: "/f/interested",
+  // The public calendar behind links.luma; its events are listed on the page.
+  lumaCalendarId: "cal-W4uKEbviDPPslEE",
   team: [
     { name: "Caden Johnson", photo: "/caden-johnson.jpg", linkedin: "https://www.linkedin.com/in/caden-johnson-82ba12366/", instagram: "https://www.instagram.com/caden_j07/", role: "Campus Lead", program: "BSc Honours in Computing Science (Artificial Intelligence)" },
     { name: "Michael Seguin", photo: "/michael-seguin.jpg", linkedin: "https://www.linkedin.com/in/michaeltseguin/", instagram: "https://www.instagram.com/michaelseguinn/", role: "Campus Lead", program: "BCom in Accounting, with a minor in Strategy Management and a Certificate in Leadership" },
@@ -36,8 +41,6 @@ export const collective = {
     { q: "Where can I ask something that is not here?", a: "Ask in the Discord, or contact Caden or Michael directly." },
   ],
   events: {
-    // One honest scheduling line for the whole section, rather than a placeholder date per card.
-    note: "Dates for the first sessions are announced on Discord.",
     formats: [
       {
         title: "Workshops",

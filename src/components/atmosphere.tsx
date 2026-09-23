@@ -71,3 +71,23 @@ export function ScrollReveals() {
   }, []);
   return null;
 }
+
+/** Marks the hero and each colour band `data-offscreen` while it is out of view.
+    CSS then hides and pauses that part's decorative layers, so the GPU only
+    holds and composites the backgrounds a visitor can actually see, instead of
+    every animated layer on the page at once. Without JavaScript nothing is
+    marked and the page behaves as before. */
+export function OffscreenPause() {
+  useEffect(() => {
+    if (!("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) delete (entry.target as HTMLElement).dataset.offscreen;
+        else (entry.target as HTMLElement).dataset.offscreen = "";
+      }
+    }, { rootMargin: "120px 0px" });
+    document.querySelectorAll(".hero, .section-band").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+  return null;
+}

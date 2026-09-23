@@ -4,7 +4,7 @@ import { siteUrl } from "@/content/collective";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary" },
   title: "OpenAI Student Collective | University of Alberta",
   description: "Explore AI with us. OpenAI’s student program at the University of Alberta. Workshops, studio sessions, and student projects with ChatGPT and Codex.",
   openGraph: {

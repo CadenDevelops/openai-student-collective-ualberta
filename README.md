@@ -119,14 +119,15 @@ people. Public submission endpoints use server validation, a honeypot, hashed
 IP/form rate buckets (300 per ten minutes to allow shared campus networks), and
 transactional idempotency for retries. Rate records contain no raw IP addresses.
 These controls deter simple spam; they are not identity verification or App Check.
-No Luma integration or automated AI processing of attendee data is enabled.
+Luma is only read for its public event listings; no attendee data is exchanged
+with Luma, and no automated AI processing of attendee data is enabled.
 
 ## Motion and link previews
 
 The hero uses animated orbital paths, drifting stars, and a faint perspective grid.
 The pause control and reduced-motion preference cover all background animation.
-`src/app/opengraph-image.tsx` generates the branded 1200 by 630 PNG for shared links;
-it contains no team photo. Existing messages may retain cached previews.
+Shared links preview as text only: the title and description in `src/app/layout.tsx`,
+with no image and a `summary` card. Existing messages may retain cached previews.
 
 ### Form appearance and check-in fields
 
@@ -161,11 +162,39 @@ the implementation workflow and no live Discord test message has been sent.
 
 ## Event information
 
-Event formats are in `src/content/collective.ts`. Scheduling is a single
-`events.note` line under the gallery rather than a placeholder date on each card,
-so three identical “date to be announced” lines cannot make the site look stalled.
-The landing page keeps the hero simple and displays these details below the fold.
-Instagram has been removed from the public page.
+Event formats are in `src/content/collective.ts`. Instagram has been removed from
+the public page.
+
+Upcoming events come live from the public Luma calendar (`lumaCalendarId` in the
+content file) through `src/lib/luma.ts`, and are listed under “Upcoming” in the
+Events section; the soonest one also appears on the hero's Luma row. The home page
+stays static and re-reads Luma at most every ten minutes. Each event links to its
+Luma page, where registration happens.
+
+Luma's official API needs a paid Luma Plus plan, so this reads the public JSON the
+calendar page itself uses. It is undocumented and could change: parsing is
+defensive, and if the calendar cannot be read the section says so and links to
+Luma instead. With nothing scheduled, the section shows an empty state that
+points to the interest form.
+
+## Interest form
+
+`interestForm` in the content file (`/f/interested`, the “Stay up to date” form in
+the leads workspace) is linked from the header button, the first hero row, the
+empty events state, and the footer. Renaming that form's custom link means
+updating this one value.
+
+## Navigation and performance
+
+The header is fixed and turns solid on scroll through a CSS scroll timeline (no
+scroll listener, no backdrop blur). The FAQ shows six questions; the rest sit
+behind a native “More questions” disclosure.
+
+`OffscreenPause` marks the hero and each colour band `data-offscreen` while it is
+out of view, and CSS hides and pauses those decorative layers. Measured at
+1920px on a 2x display, running background animations fell from 31 at all times
+to 23 on the first screen and 9 further down, with their layer textures from about
+630 MB to 450 MB and 150 MB. Only layers that animate carry `will-change`.
 
 ## Interface revision
 

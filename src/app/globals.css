@@ -16,7 +16,7 @@
 }
 
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:3rem}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
 body{margin:0;background:var(--background);color:var(--text);font-family:'Inter Variable',Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
 ::selection{background:#7765bb;color:#fff}
 a{color:inherit;text-decoration:none}
@@ -40,7 +40,23 @@ a:hover .arrow:not(.arrow-down){transform:translate(2px,-2px)}
 /* -------------------------------------------------------- header & brand */
 
 .first-screen{position:relative;isolation:isolate}
-.site-header{position:absolute;top:32px;left:0;right:0;display:flex;align-items:center;z-index:2}
+/* Fixed, so the sections and the interest form are one tap away from anywhere
+   on a long page. It starts transparent over the hero and turns solid as the
+   page scrolls, driven by the scroll position itself rather than a scroll
+   listener. No backdrop blur: blurring the moving sky behind it would repaint
+   the first screen every frame. Browsers without scroll timelines get the
+   solid bar throughout. */
+.site-header{position:fixed;top:0;left:0;right:0;z-index:5;padding:18px 0;background:#10111ff2;border-bottom:1px solid var(--line)}
+@supports (animation-timeline:scroll()){
+  .site-header{animation:header-solid linear both;animation-timeline:scroll(root);animation-range:0 180px}
+}
+@keyframes header-solid{from{background:#10111f00;border-bottom-color:#ffffff00}to{background:#10111ff2;border-bottom-color:#dce0ff21}}
+.header-inner{display:flex;align-items:center;gap:28px}
+.site-nav{display:flex;gap:6px;margin-left:auto}
+.site-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:8px;font-size:14px;color:#cfcae0;transition:color .2s,background .2s}
+.site-nav a:hover{color:#fff;background:#ffffff0d}
+.header-cta{display:inline-flex;align-items:center;min-height:42px;padding:0 18px;border-radius:999px;font-size:14px;font-weight:550;color:#12121b;background:#f4f1ff;box-shadow:0 6px 24px -8px #a78bffaa;transition:background .2s,transform .2s var(--ease);white-space:nowrap}
+.header-cta:hover{background:#e3d9ff;transform:translateY(-1px)}
 .brand{display:inline-flex;align-items:center;gap:16px;flex-shrink:0}
 .brand-logo{display:block;width:40px;height:40px;object-fit:contain;border-radius:50%;box-shadow:0 0 0 1px #ffffff21,0 8px 20px -10px #000000b3}
 .brand-copy{display:flex;flex-direction:column;gap:5px;font-size:14px;line-height:1.4;letter-spacing:-.02em}
@@ -84,7 +100,10 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
    promoted once with will-change so it is rasterised a single time and then
    only moved by the compositor. */
 .atmosphere{position:absolute;z-index:-1;inset:0;overflow:hidden;pointer-events:none;background:#0b0c18;contain:layout paint}
-.atmosphere>*{will-change:transform,opacity;backface-visibility:hidden}
+/* Only layers that actually animate are promoted; static ones such as the
+   shade and the orbit frame stay in the base layer instead of each holding a
+   full-screen texture of their own. */
+.colour-field,.sky-tint,.star-field,.horizon-line,.scan-lines{will-change:transform,opacity;backface-visibility:hidden}
 .colour-field{position:absolute;border-radius:50%;animation:drift-violet 26s ease-in-out infinite alternate}
 .field-violet{width:90%;height:115%;top:-24%;left:3%;background:radial-gradient(ellipse,#8b5cf67a 0%,#6d28d94d 27%,#3b0d8a26 45%,#3b0d8a0f 58%,transparent 70%)}
 .field-blue{width:88%;height:120%;top:-27%;left:43%;background:radial-gradient(ellipse,#22d3ee6b 0%,#0e749045 29%,#0e749018 50%,transparent 68%);animation:drift-blue 30s ease-in-out infinite alternate}
@@ -137,6 +156,9 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 .link-row{--brand:#5865f2;--brand-2:#9b6bff;position:relative;overflow:hidden;touch-action:manipulation;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;min-height:86px;padding:16px 18px;border-radius:15px;border:1px solid color-mix(in oklab,var(--brand) 62%,transparent);background:linear-gradient(112deg,color-mix(in oklab,var(--brand) 52%,#141328),color-mix(in oklab,var(--brand-2) 30%,#141328));box-shadow:0 16px 36px -16px var(--brand);transition:transform .28s var(--ease),background .28s,border-color .28s,box-shadow .28s}
 .link-discord{--brand:#5865f2;--brand-2:#9b6bff}
 .link-luma{--brand:#f4633a;--brand-2:#ff3d8b}
+/* The collective's own violet-to-cyan, so the form reads as ours rather than
+   as a third-party service. */
+.link-interest{--brand:#8b5cf6;--brand-2:#22c5e0}
 .link-row:hover{transform:translateY(-3px);border-color:color-mix(in oklab,var(--brand) 92%,transparent);background:linear-gradient(112deg,color-mix(in oklab,var(--brand) 68%,#141328),color-mix(in oklab,var(--brand-2) 44%,#141328));box-shadow:0 26px 48px -16px var(--brand)}
 /* A press reads instantly on touch, where there is no hover to rely on. */
 .link-row:active{transform:scale(.985);transition-duration:.08s}
@@ -149,6 +171,8 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 .link-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
 .link-label{font-size:18px;font-weight:550;letter-spacing:-.015em}
 .link-note{font-size:14px;line-height:1.55;color:#e4e0f5}
+/* A live "next up" line can carry a long event title; two lines at most. */
+.link-note{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
 .link-go{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:1px solid #ffffff3d;background:#ffffff1c;color:#fff;transition:background .28s,border-color .28s}
 .link-row:hover .link-go{background:#ffffff2e;border-color:#ffffff66}
 .link-go .arrow{width:17px;height:17px}
@@ -211,6 +235,33 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 .events-heading .eyebrow{margin-bottom:16px}
 .events-heading h2{font-size:clamp(34px,4vw,52px)}
 .events-heading>p{color:#d3cee2;line-height:1.8;font-size:16px;margin:0 0 4px}
+/* Live from the Luma calendar. Each event is one link to its Luma page, where
+   registration happens; nothing about the visitor passes through this site. */
+.upcoming{margin-bottom:72px}
+.upcoming-label,.formats-label{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:550;letter-spacing:.15em;text-transform:uppercase;color:#b6adde;margin:0 0 18px}
+.upcoming-label::after,.formats-label::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#d5c7ff2e,transparent)}
+.formats-label{margin-bottom:26px}
+.event-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.event-item a{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:22px;padding:18px 22px;border:1px solid #cdc3ff26;border-radius:16px;background:linear-gradient(120deg,#ffffff0d,#ffffff05);transition:border-color .25s,background .25s,transform .25s var(--ease)}
+.event-item a:hover{border-color:#cdc3ff5c;background:linear-gradient(120deg,#a78bff1f,#5ff0ff0d);transform:translateY(-2px)}
+.event-date{display:flex;flex-direction:column;align-items:center;justify-content:center;width:64px;height:68px;border-radius:12px;background:linear-gradient(160deg,#8b5cf6,#22c5e0);box-shadow:inset 0 1px 0 #ffffff47,0 10px 24px -12px #8b5cf6;line-height:1}
+.event-date span:first-child{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#f3eeff}
+.event-date span:last-child{font-size:27px;font-weight:600;letter-spacing:-.03em;margin-top:5px}
+.event-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.event-title{font-size:19px;font-weight:500;letter-spacing:-.02em;line-height:1.35}
+.event-meta{font-size:14px;line-height:1.5;color:#c9c3dc}
+.event-cover{width:84px;height:84px;border-radius:10px;object-fit:cover;border:1px solid #ffffff1f}
+.event-cta{display:inline-flex;align-items:center;gap:9px;padding:10px 16px;min-height:44px;border-radius:999px;background:#f4f1ff;color:#12121b;font-size:14px;font-weight:550;white-space:nowrap}
+.event-cta .arrow{width:16px;height:16px}
+.event-cta-muted{background:#ffffff14;color:#e6e1f5;border:1px solid #ffffff2e}
+.upcoming-all{display:inline-flex;align-items:center;gap:10px;margin-top:16px;min-height:44px;font-size:14px;color:#ded4ff}
+.upcoming-all:hover{text-decoration:underline;text-underline-offset:5px}
+/* Nothing scheduled yet: say so plainly and turn it into the one useful next
+   step, the interest form, which asks exactly when people are free. */
+.upcoming-empty{display:flex;align-items:center;justify-content:space-between;gap:32px;padding:28px 30px;border:1px solid #a78bff40;border-radius:18px;background:radial-gradient(ellipse at 0% 0%,#8b5cf62e,transparent 60%),radial-gradient(ellipse at 100% 100%,#22c5e01f,transparent 60%),#ffffff05}
+.upcoming-empty-title{font-size:21px;font-weight:500;letter-spacing:-.02em;line-height:1.4;color:#fff;margin:0 0 8px}
+.upcoming-empty p:not(.upcoming-empty-title){font-size:15px;line-height:1.7;color:#d3cee2;margin:0;max-width:520px}
+.upcoming-actions{display:flex;flex-wrap:wrap;gap:12px;flex-shrink:0}
 .event-gallery{counter-reset:format;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;list-style:none;padding:0;margin:0}
 .event-gallery>li{min-width:0;display:flex;flex-direction:column}
 .event-photo{position:relative;overflow:hidden;aspect-ratio:4/3;border-radius:14px;background:#252333;isolation:isolate}
@@ -223,8 +274,7 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 /* A quiet index in front of each format, set like the kickers above it. */
 .event-caption h3::before{counter-increment:format;content:counter(format,decimal-leading-zero);margin-right:14px;font-size:13px;font-weight:500;letter-spacing:.08em;color:#a89fdd;vertical-align:.3em}
 .event-caption p{margin:0;color:#d3cee2;font-size:15px;line-height:1.8;max-width:350px}
-.events-note{margin:38px 0 0;padding-top:22px;border-top:1px solid #d5c7ff2e;font-size:14px;line-height:1.7;color:#c6bfd9}
-.events-footer{display:flex;justify-content:space-between;align-items:center;gap:25px;margin-top:18px}
+.events-footer{display:flex;justify-content:space-between;align-items:center;gap:25px;margin-top:38px;padding-top:18px;border-top:1px solid #d5c7ff2e}
 .events-footer p{font-size:12px;color:#bcb4ce;line-height:1.7}
 .events-footer p a{text-decoration:underline;text-underline-offset:3px}
 .events-updates{display:inline-flex;align-items:center;gap:14px;color:#e1d7f5;font-size:14px;min-height:44px}
@@ -278,10 +328,23 @@ h1 span{display:block;background:linear-gradient(110deg,#f5efff 22%,#d6d5ff 47%,
 .faq details > p{margin:0;padding:0 46px 24px 4px;font-size:16px;line-height:1.75;color:#d2cde3;text-wrap:pretty}
 .faq details > p a{color:#ded4ff;text-decoration:underline;text-underline-offset:4px}
 .faq details > p a:hover{color:#fff}
+/* The first few answers cover most visits; the rest stay one tap away, and
+   still turn up in find-in-page because they are native disclosure content. */
+.faq-more{text-align:center}
+.faq .faq-more>summary{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:28px;padding:10px 20px;border:1px solid #cdc3ff33;border-radius:999px;font-size:15px;color:#ded4ff;cursor:pointer;list-style:none;transition:background .2s,border-color .2s}
+.faq .faq-more>summary:hover{background:#ffffff0d;border-color:#cdc3ff66}
+.faq-more>summary span{color:#a9a3c4}
+.faq-more[open]>summary{display:none}
+.faq-more .faq-list{margin-top:0;border-top:0}
 
 /* ---------------------------------------------------------------- footer */
 
-.site-footer{padding:35px 0 40px;display:flex;align-items:center;justify-content:space-between;gap:30px;border-top:1px solid var(--line)}
+.site-footer{padding:44px 0 48px;display:flex;align-items:flex-start;justify-content:space-between;gap:40px;border-top:1px solid var(--line)}
+.footer-brand p{font-size:13px;line-height:1.6;color:#aeaac2;margin:16px 0 0;max-width:340px}
+.footer-links{display:grid;grid-template-columns:repeat(2,auto);gap:4px 36px}
+.footer-links a{display:inline-flex;align-items:center;gap:10px;min-height:44px;font-size:14px;color:#d6cfea}
+.footer-links a:hover{color:#fff;text-decoration:underline;text-underline-offset:5px}
+.footer-links .arrow{width:15px;height:15px;opacity:.7}
 .brand-footer .brand-logo{width:30px;height:30px}
 .brand-footer .brand-copy{font-size:12px}
 .brand-footer .brand-copy>span:last-child{font-size:12px}
@@ -304,6 +367,16 @@ html:not([data-motion]) .atmosphere,html:not([data-motion]) .atmosphere *,html:n
 html:not([data-motion]) .section-band::after,html:not([data-motion]) .section-light *,
 html:not([data-motion]) .section-light::after,
 html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *::after{animation-play-state:paused}
+
+/* Parts of the page scrolled out of view (OffscreenPause) drop their
+   decorative layers entirely: hidden layers are not composited and their
+   promoted textures can be released, and paused animations stop ticking. */
+.hero[data-offscreen] .atmosphere,
+.section-band[data-offscreen] .section-light,
+.section-band[data-offscreen] .about-figure{visibility:hidden}
+.hero[data-offscreen] .atmosphere *,.hero[data-offscreen] .atmosphere *::after,.hero[data-offscreen] .atmosphere *::before,
+.section-band[data-offscreen]::after,.section-band[data-offscreen] .section-light *,.section-band[data-offscreen] .section-light::after,
+.section-band[data-offscreen] .about-figure *,.section-band[data-offscreen] .about-figure *::after{animation-play-state:paused;will-change:auto}
 
 @keyframes arrive{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes drift-violet{0%{transform:translate(-10%,-8%) scale(.93) rotate(-12deg)}50%{transform:translate(10%,5%) scale(1.12) rotate(8deg)}100%{transform:translate(-6%,16%) scale(1.04) rotate(-5deg)}}
@@ -336,7 +409,7 @@ html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *:
   .link-note{font-size:15px}
   .link-go{width:44px;height:44px}
   .about-grid{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:clamp(56px,6vw,112px);align-items:start;text-align:left}
-  .about-heading{position:sticky;top:64px}
+  .about-heading{position:sticky;top:112px}
   .about-heading .eyebrow{margin-bottom:20px}
   .about-copy{max-width:660px;margin-inline:0}
   .about-copy .section-description{margin-top:0}
@@ -376,7 +449,10 @@ html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *:
   /* A slightly short hero lets the community cards peek above the fold. */
   :root{--first-screen:max(600px,92svh)}
   .shell{width:calc(100% - 48px)}
-  .site-header{top:23px}
+  .site-header{padding:12px 0}
+  .site-nav{display:none}
+  .header-inner{justify-content:space-between;gap:12px}
+  .header-cta{min-height:40px;padding:0 15px;font-size:13px}
   .brand{gap:11px}
   .brand-logo{width:32px;height:32px}
   .brand-copy{font-size:12px}
@@ -418,7 +494,8 @@ html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *:
   .team-layout{grid-template-columns:1fr;max-width:390px;gap:38px;margin-top:35px}
   .team-list{gap:32px}
   .member-photo{width:72px;height:72px}
-  .site-footer{align-items:flex-start;flex-direction:column;gap:18px;padding-block:30px}
+  .site-footer{flex-direction:column;gap:22px;padding-block:34px}
+  .footer-links{grid-template-columns:1fr 1fr;gap:0 20px;width:100%}
 }
 
 @media(max-width:640px){
@@ -428,8 +505,21 @@ html:not([data-motion]) .about-figure *,html:not([data-motion]) .about-figure *:
   .event-caption{padding:21px 0 0}
   .event-caption h3{font-size:27px}
   .event-caption p{max-width:none}
-  .events-note{margin-top:30px}
+  .upcoming{margin-bottom:56px}
+  .event-item a{grid-template-columns:auto minmax(0,1fr);gap:14px 16px;padding:16px}
+  .event-cover{display:none}
+  .event-cta{grid-column:1/-1;justify-content:center}
+  .event-date{width:56px;height:60px}
+  .event-date span:last-child{font-size:23px}
+  .event-title{font-size:17px}
+  .upcoming-empty{flex-direction:column;align-items:stretch;padding:22px 20px;gap:22px}
+  .upcoming-empty-title{font-size:18px}
+  .upcoming-actions{flex-direction:column}
   .events-footer{align-items:flex-start;flex-direction:column;gap:4px;margin-top:14px}
+}
+
+@media(max-width:400px){
+  .brand-copy>span:last-child{display:none}
 }
 
 @media(max-width:380px){
