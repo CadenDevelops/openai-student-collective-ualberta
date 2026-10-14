@@ -14,12 +14,9 @@ import {
 export const dynamic = "force-dynamic";
 type Context = { params: Promise<{ path: string[] }> };
 export async function GET(req: Request, ctx: Context) {
-  if (!(await lead()))
-    return Response.json({ error: "Sign in to continue." }, { status: 401 });
+  if (!(await lead())) return Response.json({ error: "Sign in to continue." }, { status: 401 });
   const { path } = await ctx.params;
   try {
-    // Checked as the lead types, so a taken link is caught before saving.
-    // The claim on save is still transactional; this is only for the message.
     if (path[0] === "slugs" && path.length === 2) {
       const url = new URL(req.url);
       let slug: string;
@@ -36,19 +33,14 @@ export async function GET(req: Request, ctx: Context) {
     }
     if (path[0] !== "forms") return new Response(null, { status: 404 });
     if (!path[1]) {
-      const s = await db()
-        .collection("forms")
-        .orderBy("createdAt", "desc")
-        .limit(200)
-        .get();
+      const s = await db().collection("forms").orderBy("createdAt", "desc").limit(200).get();
       return Response.json({
         forms: s.docs.map((d) => ({ ...d.data(), id: d.id })),
       });
     }
     const ref = db().collection("forms").doc(path[1]);
     const doc = await ref.get();
-    if (!doc.exists)
-      return Response.json({ error: "Form not found." }, { status: 404 });
+    if (!doc.exists) return Response.json({ error: "Form not found." }, { status: 404 });
     if (path[2] === "responses" || path[2] === "export") {
       const url = new URL(req.url);
       let q = ref
@@ -58,8 +50,7 @@ export async function GET(req: Request, ctx: Context) {
       const cursor = url.searchParams.get("cursor");
       if (cursor) {
         const c = await ref.collection("responses").doc(cursor).get();
-        if (!c.exists)
-          return Response.json({ error: "Invalid page." }, { status: 400 });
+        if (!c.exists) return Response.json({ error: "Invalid page." }, { status: 400 });
         q = q.startAfter(c);
       }
       const s = await q.get();
@@ -75,23 +66,17 @@ export async function GET(req: Request, ctx: Context) {
           );
         const labels = new Map<string, string>();
         responses.forEach((r) =>
-          r.fields.forEach((f) =>
-            labels.set(`${r.version}:${f.id}`, `v${r.version}: ${f.label}`),
-          ),
+          r.fields.forEach((f) => labels.set(`${r.version}:${f.id}`, `v${r.version}: ${f.label}`)),
         );
         const keys = [...labels.keys()];
         const rows = [
-          ["Submitted at", "Version", ...labels.values()]
-            .map(csvCell)
-            .join(","),
+          ["Submitted at", "Version", ...labels.values()].map(csvCell).join(","),
           ...responses.map((r) =>
             [
               r.createdAt,
               r.version,
               ...keys.map((k) =>
-                k.startsWith(`${r.version}:`)
-                  ? r.answers[k.slice(k.indexOf(":") + 1)]
-                  : "",
+                k.startsWith(`${r.version}:`) ? r.answers[k.slice(k.indexOf(":") + 1)] : "",
               ),
             ]
               .map(csvCell)
@@ -114,22 +99,17 @@ export async function GET(req: Request, ctx: Context) {
     }
     return Response.json({ form: { ...doc.data(), id: doc.id } });
   } catch {
-    return Response.json(
-      { error: "Could not load data. Please try again." },
-      { status: 500 },
-    );
+    return Response.json({ error: "Could not load data. Please try again." }, { status: 500 });
   }
 }
 export async function POST(req: Request, ctx: Context) {
   const user = await lead();
-  if (!user)
-    return Response.json({ error: "Sign in to continue." }, { status: 401 });
+  if (!user) return Response.json({ error: "Sign in to continue." }, { status: 401 });
   try {
     checkOrigin(req);
     const { path } = await ctx.params;
     const input = await body(req);
-    if (path[0] !== "forms" || path.length > 2)
-      return new Response(null, { status: 404 });
+    if (path[0] !== "forms" || path.length > 2) return new Response(null, { status: 404 });
     if (!path[1]) {
       const kind = ["checkin", "interest", "feedback"].includes(input.template)
         ? input.template
@@ -177,13 +157,11 @@ export async function POST(req: Request, ctx: Context) {
 }
 export async function PUT(req: Request, ctx: Context) {
   const user = await lead();
-  if (!user)
-    return Response.json({ error: "Sign in to continue." }, { status: 401 });
+  if (!user) return Response.json({ error: "Sign in to continue." }, { status: 401 });
   try {
     checkOrigin(req);
     const { path } = await ctx.params;
-    if (path[0] !== "forms" || path.length !== 2)
-      return new Response(null, { status: 404 });
+    if (path[0] !== "forms" || path.length !== 2) return new Response(null, { status: 404 });
     const input = await body(req);
     const data = validateDefinition(input);
     const ref = db().collection("forms").doc(path[1]);
@@ -193,9 +171,7 @@ export async function PUT(req: Request, ctx: Context) {
       const old = snap.data()!;
       if (old.deleting) throw new Error("This form is being deleted.");
       if (input.version !== old.version)
-        throw new Error(
-          "This form was edited elsewhere. Reload before saving.",
-        );
+        throw new Error("This form was edited elsewhere. Reload before saving.");
       const updated = {
         ...old,
         ...data,
@@ -222,12 +198,12 @@ export async function DELETE(req: Request, ctx: Context) {
   if (path[0] !== "forms") return new Response(null, { status: 404 });
   try {
     checkOrigin(req);
-    // One response: forms/<id>/responses/<responseId>
+    // forms/<id>/responses/<responseId>
     if (path.length === 4 && path[2] === "responses") {
       await deleteResponse(db(), path[1], path[3]);
       return Response.json({ deleted: 1 });
     }
-    // One form: forms/<id>
+    // forms/<id>
     if (path.length === 2) {
       const input = await body(req);
       if (input.confirmation !== "DELETE FORM")
@@ -238,7 +214,7 @@ export async function DELETE(req: Request, ctx: Context) {
       await deleteForm(db(), ref);
       return Response.json({ deleted: 1 });
     }
-    // Every form: forms
+    // forms
     if (path.length === 1) {
       const input = await body(req);
       if (input.confirmation !== "DELETE ALL FORMS")
@@ -247,8 +223,6 @@ export async function DELETE(req: Request, ctx: Context) {
     }
     return new Response(null, { status: 404 });
   } catch (e) {
-    // A response delete reports its own reason; the recursive deletes cannot
-    // say how far they reached, so they ask for a retry instead.
     const message =
       path.length === 4
         ? e instanceof Error

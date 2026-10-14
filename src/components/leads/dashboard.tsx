@@ -14,8 +14,7 @@ async function api(path: string, method = "GET", data?: unknown) {
   if (!r.ok) throw new Error(d.error ?? "Something went wrong.");
   return d;
 }
-const answer = (v: string | string[] | undefined) =>
-  Array.isArray(v) ? v.join(", ") : v || "—";
+const answer = (v: string | string[] | undefined) => (Array.isArray(v) ? v.join(", ") : v || "—");
 const date = (s: string) =>
   new Date(s).toLocaleString("en-CA", {
     dateStyle: "medium",
@@ -129,7 +128,12 @@ export function Dashboard({ email }: { email: string }) {
   }
   async function removeForm() {
     if (!selected) return;
-    if (!window.confirm(`Permanently delete “${selected.title}”, its ${selected.count} response${selected.count === 1 ? "" : "s"} and its saved versions? This cannot be undone, and its shared links and QR codes will stop working.`)) return;
+    if (
+      !window.confirm(
+        `Permanently delete “${selected.title}”, its ${selected.count} response${selected.count === 1 ? "" : "s"} and its saved versions? This cannot be undone, and its shared links and QR codes will stop working.`,
+      )
+    )
+      return;
     setBusy(true);
     setError("");
     setNotice("");
@@ -146,7 +150,12 @@ export function Dashboard({ email }: { email: string }) {
     }
   }
   async function removeAllForms() {
-    if (!window.confirm("Permanently delete ALL forms, responses, and saved versions? This cannot be undone. Shared form links will stop working.")) return;
+    if (
+      !window.confirm(
+        "Permanently delete ALL forms, responses, and saved versions? This cannot be undone. Shared form links will stop working.",
+      )
+    )
+      return;
     setBusy(true);
     setError("");
     setNotice("");
@@ -168,9 +177,7 @@ export function Dashboard({ email }: { email: string }) {
     await fetch("/api/session", { method: "DELETE" });
     window.location.reload();
   }
-  const visible = forms.filter((f) =>
-    f.title.toLowerCase().includes(search.toLowerCase()),
-  );
+  const visible = forms.filter((f) => f.title.toLowerCase().includes(search.toLowerCase()));
   return (
     <div className="dashboard">
       <aside className="workspace-nav">
@@ -232,13 +239,9 @@ export function Dashboard({ email }: { email: string }) {
                 </button>
                 <h1>{selected.title}</h1>
                 <p className="muted">
-                  <span className={`status ${selected.status}`}>
-                    {selected.status}
-                  </span>{" "}
-                  · Version {selected.version} ·{" "}
-                  {dirty
-                    ? "Unsaved changes"
-                    : `Saved ${date(selected.updatedAt)}`}
+                  <span className={`status ${selected.status}`}>{selected.status}</span> · Version{" "}
+                  {selected.version} ·{" "}
+                  {dirty ? "Unsaved changes" : `Saved ${date(selected.updatedAt)}`}
                 </p>
               </div>
               <div className="actions">
@@ -248,11 +251,7 @@ export function Dashboard({ email }: { email: string }) {
                 <button className="action danger" disabled={busy} onClick={removeForm}>
                   Delete form
                 </button>
-                <button
-                  className="action primary"
-                  disabled={busy || !dirty}
-                  onClick={() => save()}
-                >
+                <button className="action primary" disabled={busy || !dirty} onClick={() => save()}>
                   {busy ? "Saving" : "Save changes"}
                 </button>
               </div>
@@ -272,11 +271,7 @@ export function Dashboard({ email }: { email: string }) {
             {tab === "edit" ? (
               <Editor form={selected} patch={patch} busy={busy} save={save} />
             ) : tab === "preview" ? (
-              <PublicForm
-                key={selected.id + selected.version}
-                form={selected}
-                preview
-              />
+              <PublicForm key={selected.id + selected.version} form={selected} preview />
             ) : tab === "share" ? (
               <Share
                 form={selected}
@@ -290,17 +285,17 @@ export function Dashboard({ email }: { email: string }) {
               <Responses key={selected.id} form={selected} />
             )}
           </>
-        ) : view === "discord" ? <DiscordPanel forms={forms} /> : view === "qr" ? <LinkQR /> : (
+        ) : view === "discord" ? (
+          <DiscordPanel forms={forms} />
+        ) : view === "qr" ? (
+          <LinkQR />
+        ) : (
           <>
             <div className="page-heading">
               <div>
                 <span className="eyebrow">CAMPUS LEADS</span>
                 <h1>
-                  {view === "overview"
-                    ? "Overview"
-                    : view === "forms"
-                      ? "Forms"
-                      : "Responses"}
+                  {view === "overview" ? "Overview" : view === "forms" ? "Forms" : "Responses"}
                 </h1>
                 <p className="muted">
                   {view === "overview"
@@ -311,24 +306,26 @@ export function Dashboard({ email }: { email: string }) {
                 </p>
               </div>
               <div className="actions">
-                <button className="action" onClick={load} disabled={loading || busy}>Refresh</button>
-                <button className="action danger" onClick={removeAllForms} disabled={loading || busy || !forms.length}>{busy ? "Working" : "Delete all forms"}</button>
+                <button className="action" onClick={load} disabled={loading || busy}>
+                  Refresh
+                </button>
+                <button
+                  className="action danger"
+                  onClick={removeAllForms}
+                  disabled={loading || busy || !forms.length}
+                >
+                  {busy ? "Working" : "Delete all forms"}
+                </button>
               </div>
             </div>
             {view === "overview" && (
               <div className="metrics">
-                <Metric
-                  label="Total responses"
-                  value={forms.reduce((n, f) => n + f.count, 0)}
-                />
+                <Metric label="Total responses" value={forms.reduce((n, f) => n + f.count, 0)} />
                 <Metric
                   label="Published forms"
                   value={forms.filter((f) => f.status === "published").length}
                 />
-                <Metric
-                  label="Drafts"
-                  value={forms.filter((f) => f.status === "draft").length}
-                />
+                <Metric label="Drafts" value={forms.filter((f) => f.status === "draft").length} />
               </div>
             )}
             {view !== "responses" && (
@@ -337,16 +334,8 @@ export function Dashboard({ email }: { email: string }) {
                 <div className="template-grid">
                   {[
                     ["checkin", "Event check-in", "Record attendance."],
-                    [
-                      "interest",
-                      "Interest form",
-                      "Collect interests and contact details.",
-                    ],
-                    [
-                      "feedback",
-                      "Feedback",
-                      "Collect event feedback.",
-                    ],
+                    ["interest", "Interest form", "Collect interests and contact details."],
+                    ["feedback", "Feedback", "Collect event feedback."],
                   ].map(([id, title, desc]) => (
                     <button
                       key={id}
@@ -367,9 +356,7 @@ export function Dashboard({ email }: { email: string }) {
             )}
             <section className="panel form-list">
               <div className="list-heading">
-                <h2>
-                  {view === "responses" ? "Forms" : "Forms"}
-                </h2>
+                <h2>{view === "responses" ? "Forms" : "Forms"}</h2>
                 <label className="search-label">
                   <span className="sr-only">Search forms</span>
                   <input
@@ -386,9 +373,7 @@ export function Dashboard({ email }: { email: string }) {
                   <button
                     className="form-row"
                     key={f.id}
-                    onClick={() =>
-                      open(f, view === "responses" ? "responses" : "edit")
-                    }
+                    onClick={() => open(f, view === "responses" ? "responses" : "edit")}
                   >
                     <span>
                       <strong>{f.title}</strong>
@@ -403,21 +388,14 @@ export function Dashboard({ email }: { email: string }) {
                 ))
               ) : (
                 <div className="empty">
-                  <h3>
-                    {search
-                      ? "No matching forms."
-                      : "No forms yet."}
-                  </h3>
+                  <h3>{search ? "No matching forms." : "No forms yet."}</h3>
                   <p className="muted">
-                    {search
-                      ? "Try a different search."
-                      : "Choose a template to create a form."}
+                    {search ? "Try a different search." : "Choose a template to create a form."}
                   </p>
                 </div>
               )}
               <p className="small muted">
-                Showing up to 200 recent forms. Totals count submissions, not
-                unique people.
+                Showing up to 200 recent forms. Totals count submissions, not unique people.
               </p>
             </section>
           </>
@@ -458,9 +436,7 @@ function Editor({
   function local(s: string) {
     if (!s) return "";
     const d = new Date(s);
-    return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 16);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   }
   return (
     <fieldset disabled={busy} className="editor-lock">
@@ -513,9 +489,7 @@ function Editor({
                     <button
                       aria-label={`Remove question ${i + 1}`}
                       disabled={form.fields.length === 1}
-                      onClick={() =>
-                        patch({ fields: form.fields.filter((_, n) => n !== i) })
-                      }
+                      onClick={() => patch({ fields: form.fields.filter((_, n) => n !== i) })}
                     >
                       Remove
                     </button>
@@ -534,9 +508,7 @@ function Editor({
                     Answer type
                     <select
                       value={f.type}
-                      onChange={(e) =>
-                        field(i, { type: e.target.value as Field["type"] })
-                      }
+                      onChange={(e) => field(i, { type: e.target.value as Field["type"] })}
                     >
                       <option value="text">Short answer</option>
                       <option value="email">Email</option>
@@ -555,16 +527,18 @@ function Editor({
                     Required
                   </label>
                 </div>
-                {f.type === "program" && <p className="small muted">Options follow the Faculty field. Includes Other and Not applicable.</p>}
+                {f.type === "program" && (
+                  <p className="small muted">
+                    Options follow the Faculty field. Includes Other and Not applicable.
+                  </p>
+                )}
                 {["select", "multi"].includes(f.type) && (
                   <label>
                     Options, one per line
                     <textarea
                       rows={Math.max(3, f.options.length)}
                       value={f.options.join("\n")}
-                      onChange={(e) =>
-                        field(i, { options: e.target.value.split("\n") })
-                      }
+                      onChange={(e) => field(i, { options: e.target.value.split("\n") })}
                     />
                   </label>
                 )}
@@ -595,16 +569,35 @@ function Editor({
         <aside>
           <section className="panel editor-section">
             <h2>Appearance</h2>
-            <label>Background<select value={form.background ?? "aurora"} onChange={e => patch({background: e.target.value as FormDefinition["background"]})}>
-              <option value="aurora">Aurora</option><option value="grid">Moving grid</option><option value="none">Plain</option>
-            </select></label>
-            <label className="inline-check"><input type="checkbox" checked={form.animated !== false} onChange={e => patch({animated:e.target.checked})} />Animate background</label>
-            <p className="small muted">Preview shows these settings. Reduced motion is respected.</p>
-          </section><section className="panel editor-section">
+            <label>
+              Background
+              <select
+                value={form.background ?? "aurora"}
+                onChange={(e) =>
+                  patch({ background: e.target.value as FormDefinition["background"] })
+                }
+              >
+                <option value="aurora">Aurora</option>
+                <option value="grid">Moving grid</option>
+                <option value="none">Plain</option>
+              </select>
+            </label>
+            <label className="inline-check">
+              <input
+                type="checkbox"
+                checked={form.animated !== false}
+                onChange={(e) => patch({ animated: e.target.checked })}
+              />
+              Animate background
+            </label>
+            <p className="small muted">
+              Preview shows these settings. Reduced motion is respected.
+            </p>
+          </section>
+          <section className="panel editor-section">
             <h2>Publish & timing</h2>
             <p className="muted small">
-              Drafts are private. Published forms accept responses within the
-              times you choose.
+              Drafts are private. Published forms accept responses within the times you choose.
             </p>
             <label>
               Opens at
@@ -613,9 +606,7 @@ function Editor({
                 value={local(form.opensAt)}
                 onChange={(e) =>
                   patch({
-                    opensAt: e.target.value
-                      ? new Date(e.target.value).toISOString()
-                      : "",
+                    opensAt: e.target.value ? new Date(e.target.value).toISOString() : "",
                   })
                 }
               />
@@ -627,23 +618,18 @@ function Editor({
                 value={local(form.closesAt)}
                 onChange={(e) =>
                   patch({
-                    closesAt: e.target.value
-                      ? new Date(e.target.value).toISOString()
-                      : "",
+                    closesAt: e.target.value ? new Date(e.target.value).toISOString() : "",
                   })
                 }
               />
             </label>
             <p className="small muted">
-              Times use your device’s local timezone. Leave blank for no time
-              limit.
+              Times use your device’s local timezone. Leave blank for no time limit.
             </p>
             <button
               className="action primary wide"
               disabled={busy}
-              onClick={() =>
-                save(form.status === "published" ? "closed" : "published")
-              }
+              onClick={() => save(form.status === "published" ? "closed" : "published")}
             >
               {form.status === "published" ? "Close form" : "Save & publish"}
             </button>
@@ -674,20 +660,33 @@ function Editor({
     </fieldset>
   );
 }
-function Share({ form, dirty, onSlug }: { form: FormDefinition; dirty: boolean; onSlug: (slug: string | null) => void }) {
+function Share({
+  form,
+  dirty,
+  onSlug,
+}: {
+  form: FormDefinition;
+  dirty: boolean;
+  onSlug: (slug: string | null) => void;
+}) {
   const [qr, setQr] = useState("");
   const [copied, setCopied] = useState("");
   const [url, setUrl] = useState("");
   const [slug, setSlug] = useState(form.slug ?? "");
-  const [check, setCheck] = useState<{ state: "idle" | "checking" | "free" | "taken"; reason: string }>({ state: "idle", reason: "" });
+  const [check, setCheck] = useState<{
+    state: "idle" | "checking" | "free" | "taken";
+    reason: string;
+  }>({ state: "idle", reason: "" });
   const [savingSlug, setSavingSlug] = useState(false);
   const [slugNotice, setSlugNotice] = useState("");
   const saved = form.slug ?? "";
   const cleaned = slug.trim().toLowerCase();
-  useEffect(() => { setSlug(form.slug ?? ""); setSlugNotice(""); setCheck({ state: "idle", reason: "" }); }, [form.id, form.slug]);
   useEffect(() => {
-    // The link the lead will actually hand out: the custom one once it is
-    // saved, so the QR code and the copy button never disagree with it.
+    setSlug(form.slug ?? "");
+    setSlugNotice("");
+    setCheck({ state: "idle", reason: "" });
+  }, [form.id, form.slug]);
+  useEffect(() => {
     const u = `${window.location.origin}/f/${form.slug || form.id}`;
     setUrl(u);
     QRCode.toDataURL(u, {
@@ -700,9 +699,10 @@ function Share({ form, dirty, onSlug }: { form: FormDefinition; dirty: boolean; 
       .catch(() => setCopied("Could not generate the QR code."));
   }, [form.id, form.slug]);
   useEffect(() => {
-    // Availability as you type. The claim on save is transactional, so this
-    // only ever saves the lead a round trip; it is never the check that counts.
-    if (!cleaned || cleaned === saved) { setCheck({ state: "idle", reason: "" }); return; }
+    if (!cleaned || cleaned === saved) {
+      setCheck({ state: "idle", reason: "" });
+      return;
+    }
     setCheck({ state: "checking", reason: "" });
     const t = setTimeout(async () => {
       try {
@@ -732,9 +732,7 @@ function Share({ form, dirty, onSlug }: { form: FormDefinition; dirty: boolean; 
     <section className="panel share-panel">
       <div>
         <h2>Share form</h2>
-        <p className="muted">
-          Copy the link or download the QR code.
-        </p>
+        <p className="muted">Copy the link or download the QR code.</p>
         {(form.status !== "published" || dirty) && (
           <p role="status" className="notice">
             {dirty
@@ -784,7 +782,10 @@ function Share({ form, dirty, onSlug }: { form: FormDefinition; dirty: boolean; 
                 autoCapitalize="none"
                 placeholder="fall-kickoff"
                 maxLength={48}
-                onChange={(e) => { setSlug(e.target.value); setSlugNotice(""); }}
+                onChange={(e) => {
+                  setSlug(e.target.value);
+                  setSlugNotice("");
+                }}
               />
             </span>
           </label>
@@ -800,7 +801,13 @@ function Share({ form, dirty, onSlug }: { form: FormDefinition; dirty: boolean; 
           <div className="actions">
             <button
               className="action primary"
-              disabled={savingSlug || !cleaned || cleaned === saved || check.state === "taken" || check.state === "checking"}
+              disabled={
+                savingSlug ||
+                !cleaned ||
+                cleaned === saved ||
+                check.state === "taken" ||
+                check.state === "checking"
+              }
               onClick={() => saveSlug(cleaned)}
             >
               {savingSlug ? "Saving" : saved ? "Update link" : "Save link"}
@@ -810,7 +817,11 @@ function Share({ form, dirty, onSlug }: { form: FormDefinition; dirty: boolean; 
                 className="action danger"
                 disabled={savingSlug}
                 onClick={() => {
-                  if (window.confirm(`Remove /f/${saved}? Anything already sharing that link will stop working.`)) {
+                  if (
+                    window.confirm(
+                      `Remove /f/${saved}? Anything already sharing that link will stop working.`,
+                    )
+                  ) {
                     setSlug("");
                     saveSlug(null);
                   }
@@ -825,12 +836,7 @@ function Share({ form, dirty, onSlug }: { form: FormDefinition; dirty: boolean; 
       <div className="qr-card">
         {qr && (
           <>
-            <img
-              src={qr}
-              width="240"
-              height="240"
-              alt={`QR code linking to ${form.title}`}
-            />
+            <img src={qr} width="240" height="240" alt={`QR code linking to ${form.title}`} />
             <a className="action" href={qr} download={`${form.slug || form.id}-qr.png`}>
               Download QR code
             </a>
@@ -850,18 +856,20 @@ function Responses({ form }: { form: FormDefinition }) {
   const [detail, setDetail] = useState<Submission | null>(null);
   const [filter, setFilter] = useState("");
   const [filterValue, setFilterValue] = useState("");
-  const [columns, setColumns] = useState<string[]>(
-    form.fields.slice(0, 4).map((f) => f.id),
-  );
+  const [columns, setColumns] = useState<string[]>(form.fields.slice(0, 4).map((f) => f.id));
   async function removeResponse(r: Submission) {
     const who = r.answers.name ? `the response from ${answer(r.answers.name)}` : "this response";
-    if (!window.confirm(`Permanently delete ${who}, submitted ${date(r.createdAt)}? This cannot be undone.`)) return;
+    if (
+      !window.confirm(
+        `Permanently delete ${who}, submitted ${date(r.createdAt)}? This cannot be undone.`,
+      )
+    )
+      return;
     setBusy(true);
     setError("");
     try {
       await api(`forms/${form.id}/responses/${r.id}`, "DELETE");
-      // Trust the local edit rather than reloading: a refetch would reshuffle
-      // the cursor and drop every page the lead has already loaded.
+      // a refetch would reset the cursor and drop loaded pages
       setRows((all) => all.filter((x) => x.id !== r.id));
       setTotal((t) => Math.max(0, t - 1));
       setDetail((d) => (d?.id === r.id ? null : d));
@@ -875,9 +883,7 @@ function Responses({ form }: { form: FormDefinition }) {
     setBusy(true);
     setError("");
     try {
-      const d = await api(
-        `forms/${form.id}/responses${more && cursor ? `?cursor=${cursor}` : ""}`,
-      );
+      const d = await api(`forms/${form.id}/responses${more && cursor ? `?cursor=${cursor}` : ""}`);
       setRows((r) => (more ? [...r, ...d.responses] : d.responses));
       setCursor(d.nextCursor);
       setTotal(d.total);
@@ -891,18 +897,12 @@ function Responses({ form }: { form: FormDefinition }) {
     load();
   }, [form.id]);
   const fields = Array.from(
-    new Map(
-      [...form.fields, ...rows.flatMap((r) => r.fields)].map((f) => [f.id, f]),
-    ).values(),
+    new Map([...form.fields, ...rows.flatMap((r) => r.fields)].map((f) => [f.id, f])).values(),
   );
   const visible = rows.filter(
     (r) =>
       (!search ||
-        Object.values(r.answers)
-          .flat()
-          .join(" ")
-          .toLowerCase()
-          .includes(search.toLowerCase())) &&
+        Object.values(r.answers).flat().join(" ").toLowerCase().includes(search.toLowerCase())) &&
       (!filter ||
         !filterValue ||
         (Array.isArray(r.answers[filter])
@@ -924,8 +924,7 @@ function Responses({ form }: { form: FormDefinition }) {
         <div>
           <h2>Responses</h2>
           <p className="muted small">
-            {rows.length} loaded · {total} total. Summaries and filters use
-            loaded responses.
+            {rows.length} loaded · {total} total. Summaries and filters use loaded responses.
           </p>
         </div>
         <div className="actions">
@@ -961,11 +960,7 @@ function Responses({ form }: { form: FormDefinition }) {
                 </div>
               </div>
             ))}
-          {!days.size && (
-            <p className="muted small">
-              No responses yet.
-            </p>
-          )}
+          {!days.size && <p className="muted small">No responses yet.</p>}
         </section>
         {summary.map((f) => {
           const counts = new Map<string, number>();
@@ -994,9 +989,7 @@ function Responses({ form }: { form: FormDefinition }) {
                     </div>
                   </div>
                 ))}
-              {!counts.size && (
-                <p className="muted small">Responses will appear here.</p>
-              )}
+              {!counts.size && <p className="muted small">Responses will appear here.</p>}
             </section>
           );
         })}
@@ -1031,10 +1024,7 @@ function Responses({ form }: { form: FormDefinition }) {
           {chosen && (
             <label>
               Answer
-              <select
-                value={filterValue}
-                onChange={(e) => setFilterValue(e.target.value)}
-              >
+              <select value={filterValue} onChange={(e) => setFilterValue(e.target.value)}>
                 <option value="">All answers</option>
                 {[...new Set(rows.flatMap((r) => r.answers[chosen.id] ?? []))]
                   .filter(Boolean)
@@ -1055,9 +1045,7 @@ function Responses({ form }: { form: FormDefinition }) {
                   checked={columns.includes(f.id)}
                   onChange={(e) =>
                     setColumns((c) =>
-                      e.target.checked
-                        ? [...c, f.id]
-                        : c.filter((x) => x !== f.id),
+                      e.target.checked ? [...c, f.id] : c.filter((x) => x !== f.id),
                     )
                   }
                 />
@@ -1070,11 +1058,7 @@ function Responses({ form }: { form: FormDefinition }) {
           <p role="status">Loading responses</p>
         ) : !visible.length ? (
           <div className="empty">
-            <h3>
-              {rows.length
-                ? "No matching responses."
-                : "Ready when your guests are."}
-            </h3>
+            <h3>{rows.length ? "No matching responses." : "Ready when your guests are."}</h3>
             <p className="muted">
               {rows.length
                 ? "Try changing your filters."
@@ -1110,10 +1094,7 @@ function Responses({ form }: { form: FormDefinition }) {
                         <span className="row-actions">
                           <button onClick={() => setDetail(r)}>
                             View
-                            <span className="sr-only">
-                              {" "}
-                              response from {date(r.createdAt)}
-                            </span>
+                            <span className="sr-only"> response from {date(r.createdAt)}</span>
                           </button>
                           <button
                             className="row-delete"
@@ -1121,10 +1102,7 @@ function Responses({ form }: { form: FormDefinition }) {
                             onClick={() => removeResponse(r)}
                           >
                             Delete
-                            <span className="sr-only">
-                              {" "}
-                              response from {date(r.createdAt)}
-                            </span>
+                            <span className="sr-only"> response from {date(r.createdAt)}</span>
                           </button>
                         </span>
                       </td>
@@ -1135,32 +1113,29 @@ function Responses({ form }: { form: FormDefinition }) {
             </div>
             <div className="response-cards">
               {visible.map((r) => (
-                <button
-                  className="response-card"
-                  key={r.id}
-                  onClick={() => setDetail(r)}
-                >
+                <button className="response-card" key={r.id} onClick={() => setDetail(r)}>
                   <strong>{String(r.answers.name ?? "Response")}</strong>
                   <span>{date(r.createdAt)}</span>
-                  <small>
-                    {Object.values(r.answers).flat().slice(0, 3).join(" · ")}
-                  </small>
+                  <small>{Object.values(r.answers).flat().slice(0, 3).join(" · ")}</small>
                 </button>
               ))}
             </div>
           </>
         )}
         {cursor && (
-          <button
-            className="action wide"
-            disabled={busy}
-            onClick={() => load(true)}
-          >
+          <button className="action wide" disabled={busy} onClick={() => load(true)}>
             {busy ? "Loading" : "Load next 100 responses"}
           </button>
         )}
       </section>
-      {detail && <ResponseDetail row={detail} close={() => setDetail(null)} remove={() => removeResponse(detail)} busy={busy} />}
+      {detail && (
+        <ResponseDetail
+          row={detail}
+          close={() => setDetail(null)}
+          remove={() => removeResponse(detail)}
+          busy={busy}
+        />
+      )}
     </>
   );
 }
@@ -1214,7 +1189,68 @@ function ResponseDetail({
 }
 
 function LinkQR() {
-  const [url,setUrl]=useState(""); const [image,setImage]=useState(""); const [error,setError]=useState(""); const [busy,setBusy]=useState(false);
-  async function generate(e:React.FormEvent) {e.preventDefault();setError("");setImage("");setBusy(true);try {const u=new URL(url.trim());if(!["https:","http:"].includes(u.protocol)) throw new Error("Enter an http or https link.");if(u.href.length>2000) throw new Error("This link is too long.");setImage(await QRCode.toDataURL(u.href,{width:1200,margin:4,errorCorrectionLevel:"M"}));}catch(e){setError(e instanceof Error?e.message:"Could not generate QR code.");}finally{setBusy(false);}}
-  return <><div className="page-heading"><h1>QR codes</h1></div><section className="panel editor-section"><form onSubmit={generate}><label>Web link<input type="url" required placeholder="https://" value={url} onChange={e=>{setUrl(e.target.value);setImage("");setError("");}} /></label><button className="action primary" disabled={busy}>{busy?"Generating":"Generate QR code"}</button></form>{error&&<p className="error" role="alert">{error}</p>}{image&&<div className="link-qr-result"><img src={image} width="300" height="300" alt="QR code for the entered web link" /><a className="action" href={image} download="qr-code.png">Download PNG</a></div>}</section></>;
+  const [url, setUrl] = useState("");
+  const [image, setImage] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function generate(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setImage("");
+    setBusy(true);
+    try {
+      const u = new URL(url.trim());
+      if (!["https:", "http:"].includes(u.protocol))
+        throw new Error("Enter an http or https link.");
+      if (u.href.length > 2000) throw new Error("This link is too long.");
+      setImage(
+        await QRCode.toDataURL(u.href, { width: 1200, margin: 4, errorCorrectionLevel: "M" }),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not generate QR code.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <>
+      <div className="page-heading">
+        <h1>QR codes</h1>
+      </div>
+      <section className="panel editor-section">
+        <form onSubmit={generate}>
+          <label>
+            Web link
+            <input
+              type="url"
+              required
+              placeholder="https://"
+              value={url}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                setImage("");
+                setError("");
+              }}
+            />
+          </label>
+          <button className="action primary" disabled={busy}>
+            {busy ? "Generating" : "Generate QR code"}
+          </button>
+        </form>
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
+        {image && (
+          <div className="link-qr-result">
+            <img src={image} width="300" height="300" alt="QR code for the entered web link" />
+            <a className="action" href={image} download="qr-code.png">
+              Download PNG
+            </a>
+          </div>
+        )}
+      </section>
+    </>
+  );
 }

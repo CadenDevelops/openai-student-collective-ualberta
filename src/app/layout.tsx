@@ -6,10 +6,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   twitter: { card: "summary" },
   title: "OpenAI Student Collective | University of Alberta",
-  description: "Explore AI with us. OpenAI’s student program at the University of Alberta. Workshops, studio sessions, and student projects with ChatGPT and Codex.",
+  description:
+    "Explore AI with us. OpenAI’s student program at the University of Alberta. Workshops, studio sessions, and student projects with ChatGPT and Codex.",
   openGraph: {
     title: "OpenAI Student Collective at UAlberta",
-    description: "Explore AI with us. OpenAI’s student program at UAlberta, led by Caden Johnson and Michael Seguin.",
+    description:
+      "Explore AI with us. OpenAI’s student program at UAlberta, led by Caden Johnson and Michael Seguin.",
     url: siteUrl,
     type: "website",
     locale: "en_CA",
@@ -20,5 +22,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: "#08090f", colorScheme: "dark" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
 }

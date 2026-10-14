@@ -22,8 +22,6 @@ export type FormDefinition = {
   createdAt: string;
   updatedAt: string;
   count: number;
-  /** Optional custom link segment. Null or absent means the form is only
-      reachable at its document id. */
   slug?: string | null;
 };
 export type Submission = {
@@ -34,11 +32,36 @@ export type Submission = {
   fields: Field[];
 };
 const campusFields: Field[] = [
-      { id: "role", label: "Campus role", type: "select", required: true, options: ["Undergraduate student", "Graduate student", "Faculty member", "Staff", "Alumni", "Visitor / other"] },
-      { id: "faculty", label: "Faculty", type: "select", required: true, options: Object.keys(programs) },
-      { id: "program", label: "Program", type: "program", required: true, options: [] },
-      { id: "program_other", label: "Program name", type: "text", required: false, options: [] },
-      { id: "year", label: "Year of study", type: "select", required: false, options: ["1", "2", "3", "4", "5+"] },
+  {
+    id: "role",
+    label: "Campus role",
+    type: "select",
+    required: true,
+    options: [
+      "Undergraduate student",
+      "Graduate student",
+      "Faculty member",
+      "Staff",
+      "Alumni",
+      "Visitor / other",
+    ],
+  },
+  {
+    id: "faculty",
+    label: "Faculty",
+    type: "select",
+    required: true,
+    options: Object.keys(programs),
+  },
+  { id: "program", label: "Program", type: "program", required: true, options: [] },
+  { id: "program_other", label: "Program name", type: "text", required: false, options: [] },
+  {
+    id: "year",
+    label: "Year of study",
+    type: "select",
+    required: false,
+    options: ["1", "2", "3", "4", "5+"],
+  },
 ];
 export const templates = {
   checkin: {
@@ -58,20 +81,14 @@ export const templates = {
         label: "How did you hear about us?",
         type: "select",
         required: false,
-        options: [
-          "Friend",
-          "Discord",
-          "Instagram",
-          "Campus poster",
-          "Class announcement",
-          "Other",
-        ],
+        options: ["Friend", "Discord", "Instagram", "Campus poster", "Class announcement", "Other"],
       },
     ],
   },
   interest: {
     title: "Stay in the loop",
-    description: "Tell us what interests you and when events work best. Select all options that suit you. Times are Edmonton time.",
+    description:
+      "Tell us what interests you and when events work best. Select all options that suit you. Times are Edmonton time.",
     fields: [
       {
         id: "name",
@@ -93,12 +110,7 @@ export const templates = {
         label: "What interests you?",
         type: "multi",
         required: false,
-        options: [
-          "Workshops",
-          "Building projects",
-          "Meeting people",
-          "Learning about AI",
-        ],
+        options: ["Workshops", "Building projects", "Meeting people", "Learning about AI"],
       },
       {
         id: "available_days",
@@ -112,7 +124,13 @@ export const templates = {
         label: "What times work best?",
         type: "multi",
         required: false,
-        options: ["Morning · 9 am–noon", "Lunch · noon–2 pm", "Afternoon · 2–5 pm", "Early evening · 5–7 pm", "Evening · 7–9 pm"],
+        options: [
+          "Morning · 9 am–noon",
+          "Lunch · noon–2 pm",
+          "Afternoon · 2–5 pm",
+          "Early evening · 5–7 pm",
+          "Evening · 7–9 pm",
+        ],
       },
       {
         id: "event_length",
@@ -150,22 +168,15 @@ export const templates = {
       },
     ],
   },
-} satisfies Record<
-  string,
-  { title: string; description: string; fields: Field[] }
->;
-export function makeForm(
-  kind: keyof typeof templates,
-): Omit<FormDefinition, "id"> {
+} satisfies Record<string, { title: string; description: string; fields: Field[] }>;
+export function makeForm(kind: keyof typeof templates): Omit<FormDefinition, "id"> {
   const t = templates[kind];
   const now = new Date().toISOString();
   return {
     ...t,
     fields: structuredClone(t.fields),
     confirmation:
-      kind === "checkin"
-        ? "You’re checked in."
-        : "Thanks! Your response has been saved.",
+      kind === "checkin" ? "You’re checked in." : "Thanks! Your response has been saved.",
     privacy:
       "Your responses are visible to the UAlberta OpenAI Student Collective Campus Leads and used to organize and improve our activities. Please do not include sensitive personal information.",
     background: "aurora",
@@ -195,8 +206,7 @@ export function validateDefinition(value: unknown) {
     )
       throw new Error(`Please check the ${key}.`);
   }
-  if (!["draft", "published", "closed"].includes(d.status))
-    throw new Error("Invalid status.");
+  if (!["draft", "published", "closed"].includes(d.status)) throw new Error("Invalid status.");
   if (!Array.isArray(d.fields) || d.fields.length < 1 || d.fields.length > 25)
     throw new Error("Use between 1 and 25 questions.");
   const ids = new Set<string>();
@@ -221,31 +231,26 @@ export function validateDefinition(value: unknown) {
     if (
       !Array.isArray(f.options) ||
       f.options.length > 30 ||
-      f.options.some(
-        (o) => typeof o !== "string" || !o.trim() || o.length > 200,
-      ) ||
+      f.options.some((o) => typeof o !== "string" || !o.trim() || o.length > 200) ||
       new Set(f.options).size !== f.options.length
     )
-      throw new Error(
-        "Options must be unique, non-empty, and under 200 characters.",
-      );
+      throw new Error("Options must be unique, non-empty, and under 200 characters.");
     if (["select", "multi"].includes(f.type) && !f.options.length)
       throw new Error("Choice questions need at least one option.");
   }
-  if (d.fields.some(f => f.type === "program") && !d.fields.some(f => f.id === "faculty" && f.type === "select")) throw new Error("Program questions need a Faculty dropdown (id: faculty).");
-  if (d.background !== undefined && !["aurora", "grid", "none"].includes(d.background)) throw new Error("Invalid background.");
-  if (d.animated !== undefined && typeof d.animated !== "boolean") throw new Error("Invalid animation setting.");
-  for (const k of ["opensAt", "closesAt"] as const)
-    if (
-      typeof d[k] !== "string" ||
-      (d[k] && !Number.isFinite(Date.parse(d[k])))
-    )
-      throw new Error("Invalid opening or closing time.");
   if (
-    d.opensAt &&
-    d.closesAt &&
-    Date.parse(d.opensAt) >= Date.parse(d.closesAt)
+    d.fields.some((f) => f.type === "program") &&
+    !d.fields.some((f) => f.id === "faculty" && f.type === "select")
   )
+    throw new Error("Program questions need a Faculty dropdown (id: faculty).");
+  if (d.background !== undefined && !["aurora", "grid", "none"].includes(d.background))
+    throw new Error("Invalid background.");
+  if (d.animated !== undefined && typeof d.animated !== "boolean")
+    throw new Error("Invalid animation setting.");
+  for (const k of ["opensAt", "closesAt"] as const)
+    if (typeof d[k] !== "string" || (d[k] && !Number.isFinite(Date.parse(d[k]))))
+      throw new Error("Invalid opening or closing time.");
+  if (d.opensAt && d.closesAt && Date.parse(d.opensAt) >= Date.parse(d.closesAt))
     throw new Error("Closing time must be after opening time.");
   return {
     background: d.background ?? "aurora",
@@ -292,12 +297,10 @@ export function validateAnswers(fields: Field[], value: unknown) {
       )
         throw new Error(`Check “${f.label}”.`);
       const a = (v ?? []) as string[];
-      if (f.required && !a.length)
-        throw new Error(`Please answer “${f.label}”.`);
+      if (f.required && !a.length) throw new Error(`Please answer “${f.label}”.`);
       answers[f.id] = a;
     } else {
-      if (v !== undefined && typeof v !== "string")
-        throw new Error(`Check “${f.label}”.`);
+      if (v !== undefined && typeof v !== "string") throw new Error(`Check “${f.label}”.`);
       const a = ((v ?? "") as string).trim();
       if (f.required && !a) throw new Error(`Please answer “${f.label}”.`);
       if (a.length > (f.type === "textarea" ? 4000 : 500))
@@ -306,32 +309,50 @@ export function validateAnswers(fields: Field[], value: unknown) {
         throw new Error("Enter a valid email address.");
       if (a && f.type === "select" && !f.options.includes(a))
         throw new Error(`Choose an option for “${f.label}”.`);
-      if (a && f.type === "program" && !programOptions((value as Record<string,unknown>).faculty).includes(a)) throw new Error("Choose a program for the selected faculty.");
+      if (
+        a &&
+        f.type === "program" &&
+        !programOptions((value as Record<string, unknown>).faculty).includes(a)
+      )
+        throw new Error("Choose a program for the selected faculty.");
       answers[f.id] = a;
     }
   }
   return answers;
 }
-/* Words that already mean something in a URL, or that a lead would expect to
-   land somewhere else. Claiming these as form links would be confusing at
-   best and would shadow a real route at worst. */
-const reservedSlugs = new Set(["f", "form", "forms", "new", "edit", "preview", "share", "responses", "response", "qr", "discord", "leads", "lead", "login", "logout", "admin", "api", "index", "null", "undefined"]);
+const reservedSlugs = new Set([
+  "f",
+  "form",
+  "forms",
+  "new",
+  "edit",
+  "preview",
+  "share",
+  "responses",
+  "response",
+  "qr",
+  "discord",
+  "leads",
+  "lead",
+  "login",
+  "logout",
+  "admin",
+  "api",
+  "index",
+  "null",
+  "undefined",
+]);
 
-/** Validates a custom link segment for /f/<slug>.
-
-    Deliberately narrower than the document ids it shares a path with: a slug
-    must not be able to look like a UUID, so one route can resolve both without
-    a form ever being shadowed by somebody's chosen wording. */
 export function validateSlug(value: unknown) {
-  if (typeof value !== "string" || !value.trim())
-    throw new Error("Enter a custom link.");
+  if (typeof value !== "string" || !value.trim()) throw new Error("Enter a custom link.");
   const slug = value.trim().toLowerCase();
   if (!/^[a-z0-9](?:[a-z0-9_-]{1,46})[a-z0-9]$/.test(slug))
-    throw new Error("Use 3 to 48 characters: lowercase letters, numbers, hyphens and underscores, starting and ending with a letter or number.");
+    throw new Error(
+      "Use 3 to 48 characters: lowercase letters, numbers, hyphens and underscores, starting and ending with a letter or number.",
+    );
   if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(slug))
     throw new Error("That looks like a form id. Choose different wording.");
-  if (reservedSlugs.has(slug))
-    throw new Error("That word is reserved. Choose another.");
+  if (reservedSlugs.has(slug)) throw new Error("That word is reserved. Choose another.");
   return slug;
 }
 
@@ -342,8 +363,10 @@ export function csvCell(value: unknown) {
 }
 
 export function fieldVisible(f: Field, fields: Field[], answers: Record<string, unknown>) {
-  const hasRole = fields.some(x => x.id === "role" && x.type === "select");
-  if (f.id === "year" && hasRole) return ["Undergraduate student", "Graduate student"].includes(String(answers.role));
-  if (f.id === "program_other" && fields.some(x => x.id === "program" && x.type === "program")) return answers.program === "Other";
+  const hasRole = fields.some((x) => x.id === "role" && x.type === "select");
+  if (f.id === "year" && hasRole)
+    return ["Undergraduate student", "Graduate student"].includes(String(answers.role));
+  if (f.id === "program_other" && fields.some((x) => x.id === "program" && x.type === "program"))
+    return answers.program === "Other";
   return true;
 }

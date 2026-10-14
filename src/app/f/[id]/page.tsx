@@ -10,17 +10,10 @@ export const metadata: Metadata = {
   title: "Form | UAlberta Student Collective",
   robots: { index: false, follow: false },
 };
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   let form: FormDefinition | null = null;
   if (configured()) {
-    // The segment is either a document id or a custom link. Either way the
-    // form carries its real id from here on, so submissions reach the right
-    // document whichever way the visitor arrived.
     const d = await findForm(db(), id);
     if (d && d.data()?.status !== "draft")
       form = {
@@ -34,7 +27,6 @@ export default async function Page({
   }
   return (
     <div className="workspace public-workspace">
-
       <header className="workspace-brand">
         <a href="/">
           <img src="/openai-blossom.svg" width="32" height="32" alt="" />

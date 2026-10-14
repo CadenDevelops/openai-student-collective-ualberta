@@ -82,21 +82,14 @@ export async function POST(req: Request) {
         },
         { merge: true },
       );
-      // Best effort, and reported rather than thrown: the webhook is saved and
-      // usable either way, and messages carry the logo regardless.
       return Response.json({ configured: true, branded: await brandWebhook(url) });
     }
 
-    // Re-applies the name and picture, for a webhook connected before this
-    // existed or one somebody renamed inside Discord.
     if (input.action === "brand") {
       const snap = await settings().get();
       const saved = snap.data();
       if (!snap.exists || !configuredFrom(saved))
-        return Response.json(
-          { error: "Connect a Discord webhook first." },
-          { status: 409 },
-        );
+        return Response.json({ error: "Connect a Discord webhook first." }, { status: 409 });
       const branded = await brandWebhook(saved!.webhookUrl as string);
       if (!branded)
         return Response.json(
@@ -113,13 +106,9 @@ export async function POST(req: Request) {
     const snap = await settings().get();
     const saved = snap.data();
     if (!snap.exists || !configuredFrom(saved)) {
-      return Response.json(
-        { error: "Connect a Discord webhook before sending." },
-        { status: 409 },
-      );
+      return Response.json({ error: "Connect a Discord webhook before sending." }, { status: 409 });
     }
 
-    // Normalize exactly the same input shape the client uses for its preview.
     const payload = normalizeDiscordMessage(input);
     let requestUrl: string;
     try {
@@ -144,8 +133,7 @@ export async function POST(req: Request) {
       if (upstream.status === 429) {
         return Response.json(
           {
-            error:
-              "Discord is rate limiting messages. Please retry in a moment.",
+            error: "Discord is rate limiting messages. Please retry in a moment.",
           },
           { status: 429 },
         );
@@ -160,7 +148,10 @@ export async function POST(req: Request) {
     } catch {
       if (controller.signal.aborted) {
         return Response.json(
-          { error: "Discord did not confirm within 10 seconds. Check the channel before retrying to avoid a duplicate." },
+          {
+            error:
+              "Discord did not confirm within 10 seconds. Check the channel before retrying to avoid a duplicate.",
+          },
           { status: 504 },
         );
       }

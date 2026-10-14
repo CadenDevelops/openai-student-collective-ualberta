@@ -1,16 +1,9 @@
 import "server-only";
-import {
-  getApps,
-  initializeApp,
-  cert,
-  applicationDefault,
-} from "firebase-admin/app";
+import { getApps, initializeApp, cert, applicationDefault } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 export function configured() {
-  return Boolean(
-    process.env.FIREBASE_PROJECT_ID && process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  );
+  return Boolean(process.env.FIREBASE_PROJECT_ID && process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
 }
 function app() {
   if (!configured()) throw new Error("Firebase is not configured yet.");

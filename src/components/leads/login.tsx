@@ -48,19 +48,10 @@ export function LeadLogin({ ready }: { ready: boolean }) {
       <span className="pill">Campus Leads</span>
       <h1>Sign in</h1>
       <p className="muted">Manage forms and responses.</p>
-      <button
-        className="action primary"
-        disabled={!ready || busy}
-        onClick={login}
-      >
-        {busy ? "Signing in…" : "Continue with Google"}{" "}
-        <span aria-hidden="true">↗</span>
+      <button className="action primary" disabled={!ready || busy} onClick={login}>
+        {busy ? "Signing in…" : "Continue with Google"} <span aria-hidden="true">↗</span>
       </button>
-      {!ready && (
-        <p role="status">
-          The workspace is being connected. Please check back shortly.
-        </p>
-      )}
+      {!ready && <p role="status">The workspace is being connected. Please check back shortly.</p>}
       {error && (
         <p className="error" role="alert">
           {error}

@@ -53,19 +53,12 @@ test("published opening and closing boundaries are enforced", () => {
   assert.equal(isOpen(f, Date.parse(f.opensAt) - 1), false);
   assert.equal(isOpen(f, Date.parse(f.opensAt)), true);
   assert.equal(isOpen(f, Date.parse(f.closesAt)), false);
-  assert.equal(
-    isOpen({ ...f, status: "closed" }, Date.parse(f.opensAt)),
-    false,
-  );
+  assert.equal(isOpen({ ...f, status: "closed" }, Date.parse(f.opensAt)), false);
 });
 test("definition rejects duplicate ids, empty options, and unsafe keys", () => {
   const f = makeForm("checkin");
-  assert.throws(() =>
-    validateDefinition({ ...f, fields: [f.fields[0], f.fields[0]] }),
-  );
-  assert.throws(() =>
-    validateDefinition({ ...f, fields: [{ ...f.fields[0], id: "__proto__" }] }),
-  );
+  assert.throws(() => validateDefinition({ ...f, fields: [f.fields[0], f.fields[0]] }));
+  assert.throws(() => validateDefinition({ ...f, fields: [{ ...f.fields[0], id: "__proto__" }] }));
   assert.throws(() =>
     validateDefinition({
       ...f,
@@ -81,34 +74,46 @@ test("CSV handles quotes, multiline values and spreadsheet formulas", () => {
 });
 
 test("program choices must match faculty and hidden years are discarded", () => {
- const f=makeForm("checkin");
- const a={name:"Test",role:"Faculty member",faculty:"Engineering",program:"Mechanical Engineering",year:"4"};
- assert.equal(validateAnswers(f.fields,a).year,undefined);
- assert.throws(()=>validateAnswers(f.fields,{...a,faculty:"Science"}));
- assert.equal(validateAnswers(f.fields,{...a,program:"Not applicable"}).program,"Not applicable");
+  const f = makeForm("checkin");
+  const a = {
+    name: "Test",
+    role: "Faculty member",
+    faculty: "Engineering",
+    program: "Mechanical Engineering",
+    year: "4",
+  };
+  assert.equal(validateAnswers(f.fields, a).year, undefined);
+  assert.throws(() => validateAnswers(f.fields, { ...a, faculty: "Science" }));
+  assert.equal(
+    validateAnswers(f.fields, { ...a, program: "Not applicable" }).program,
+    "Not applicable",
+  );
 });
 test("background settings are validated and older forms get defaults", () => {
- const f=makeForm("checkin");
- assert.throws(()=>validateDefinition({...f,background:"invalid"}));
- assert.equal(validateDefinition({...f,background:undefined,animated:undefined}).background,"aurora");
- assert.equal(validateDefinition({...f,animated:false}).animated,false);
+  const f = makeForm("checkin");
+  assert.throws(() => validateDefinition({ ...f, background: "invalid" }));
+  assert.equal(
+    validateDefinition({ ...f, background: undefined, animated: undefined }).background,
+    "aurora",
+  );
+  assert.equal(validateDefinition({ ...f, animated: false }).animated, false);
 });
 
 test("custom links are lowercased and cannot shadow a form id or a route", () => {
   assert.equal(validateSlug("  Fall-Kickoff  "), "fall-kickoff");
   assert.equal(validateSlug("check_in_2026"), "check_in_2026");
   for (const bad of [
-    "ab",                                     // under three characters
-    "-leading",                               // must start alphanumeric
-    "trailing-",                              // must end alphanumeric
+    "ab",
+    "-leading",
+    "trailing-",
     "has space",
     "has/slash",
     "Ünicode",
-    "f",                                      // reserved route word
+    "f",
     "forms",
     "responses",
-    "a".repeat(49),                           // over the length ceiling
-    "3f2504e0-4f89-11d3-9a0c-0305e82c3301",   // shaped like a document id
+    "a".repeat(49),
+    "3f2504e0-4f89-11d3-9a0c-0305e82c3301", // looks like a document id
   ])
     assert.throws(() => validateSlug(bad), Error, `expected ${bad} to be rejected`);
   assert.throws(() => validateSlug(""), Error);

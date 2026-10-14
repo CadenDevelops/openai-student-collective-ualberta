@@ -17,9 +17,7 @@ export async function lead() {
   if (!token) return null;
   try {
     const u = await adminAuth().verifySessionCookie(token, true);
-    return u.email_verified && allowed(u.email)
-      ? { uid: u.uid, email: u.email! }
-      : null;
+    return u.email_verified && allowed(u.email) ? { uid: u.uid, email: u.email! } : null;
   } catch {
     return null;
   }

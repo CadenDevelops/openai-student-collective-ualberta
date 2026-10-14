@@ -9,7 +9,11 @@ export function Atmosphere() {
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    try { manualPause.current = localStorage.getItem("collective-motion") === "paused"; } catch { /* Storage is optional. */ }
+    try {
+      manualPause.current = localStorage.getItem("collective-motion") === "paused";
+    } catch {
+      /* storage is optional */
+    }
     const updatePreference = () => setPaused(preference.matches || manualPause.current);
     updatePreference();
     setReady(true);
@@ -25,42 +29,81 @@ export function Atmosphere() {
     const next = !paused;
     manualPause.current = next;
     setPaused(next);
-    try { localStorage.setItem("collective-motion", next ? "paused" : "playing"); } catch { /* Storage is optional. */ }
+    try {
+      localStorage.setItem("collective-motion", next ? "paused" : "playing");
+    } catch {
+      /* storage is optional */
+    }
   }
 
-  return <>
-    <div className="atmosphere" aria-hidden="true">
-      <div className="colour-field field-violet" />
-      <div className="colour-field field-blue" />
-      <div className="colour-field field-rose" />
-      <div className="sky-tint" />
-      <div className="orbital-system">
-        <div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="orbit orbit-three" />
+  return (
+    <>
+      <div className="atmosphere" aria-hidden="true">
+        <div className="colour-field field-violet" />
+        <div className="colour-field field-blue" />
+        <div className="colour-field field-rose" />
+        <div className="sky-tint" />
+        <div className="orbital-system">
+          <div className="orbit orbit-one" />
+          <div className="orbit orbit-two" />
+          <div className="orbit orbit-three" />
+        </div>
+        <div className="star-field" />
+        <div className="horizon-grid" />
+        <div className="horizon-line" />
+        <div className="scan-lines" />
+        <div className="atmosphere-shade" />
       </div>
-      <div className="star-field" />
-      <div className="horizon-grid" />
-      <div className="horizon-line" />
-      <div className="scan-lines" />
-      <div className="atmosphere-shade" />
-    </div>
-    {ready && <button type="button" className="motion-toggle" onClick={toggle} aria-label={paused ? "Play background animation" : "Pause background animation"} title={paused ? "Play background animation" : "Pause background animation"}>
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">{paused ? <path d="m5 3 8 5-8 5V3Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/> : <path d="M5.5 3v10m5-10v10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>}</svg>
-      <span>{paused ? "Play motion" : "Pause motion"}</span>
-    </button>}
-  </>;
+      {ready && (
+        <button
+          type="button"
+          className="motion-toggle"
+          onClick={toggle}
+          aria-label={paused ? "Play background animation" : "Pause background animation"}
+          title={paused ? "Play background animation" : "Pause background animation"}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            {paused ? (
+              <path
+                d="m5 3 8 5-8 5V3Z"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinejoin="round"
+              />
+            ) : (
+              <path
+                d="M5.5 3v10m5-10v10"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            )}
+          </svg>
+          <span>{paused ? "Play motion" : "Pause motion"}</span>
+        </button>
+      )}
+    </>
+  );
 }
 
 export function ScrollReveals() {
   useEffect(() => {
-    if (!('IntersectionObserver' in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          entry.target.classList.remove("reveal-pending");
-          observer.unobserve(entry.target);
+    if (
+      !("IntersectionObserver" in window) ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.remove("reveal-pending");
+            observer.unobserve(entry.target);
+          }
         }
-      }
-    }, { threshold: 0.12 });
+      },
+      { threshold: 0.12 },
+    );
     document.querySelectorAll<HTMLElement>("[data-reveal]").forEach((el) => {
       if (el.getBoundingClientRect().top > window.innerHeight) {
         el.classList.add("reveal-pending");
@@ -72,20 +115,18 @@ export function ScrollReveals() {
   return null;
 }
 
-/** Marks the hero and each colour band `data-offscreen` while it is out of view.
-    CSS then hides and pauses that part's decorative layers, so the GPU only
-    holds and composites the backgrounds a visitor can actually see, instead of
-    every animated layer on the page at once. Without JavaScript nothing is
-    marked and the page behaves as before. */
 export function OffscreenPause() {
   useEffect(() => {
     if (!("IntersectionObserver" in window)) return;
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) delete (entry.target as HTMLElement).dataset.offscreen;
-        else (entry.target as HTMLElement).dataset.offscreen = "";
-      }
-    }, { rootMargin: "120px 0px" });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) delete (entry.target as HTMLElement).dataset.offscreen;
+          else (entry.target as HTMLElement).dataset.offscreen = "";
+        }
+      },
+      { rootMargin: "120px 0px" },
+    );
     document.querySelectorAll(".hero, .section-band").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
