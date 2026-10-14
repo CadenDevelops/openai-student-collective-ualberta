@@ -1,9 +1,37 @@
 # OpenAI Student Collective at UAlberta
 
-A minimal Next.js landing page with a full-height hero, animated colour gradients,
-community links, and campus lead profiles. The information starts below the first
-screen. This is a redesign of the existing collective website in a separate checkout
-on `redesign/quiet-landing`; the previous published site has not been replaced.
+A website and event workspace for the OpenAI Student Collective at the University of Alberta. Students can find the community and upcoming events, while campus leads manage forms, check-ins, feedback, and announcements.
+
+[Visit the website](https://studentcollectiveualberta.com)
+
+## What it does
+
+- Connects students to the Discord community and Luma events.
+- Supports event check-ins, interest forms, feedback, QR codes, and CSV exports.
+- Gives campus leads a protected workspace using Google sign-in.
+- Includes keyboard navigation, visible focus, a skip link, and motion controls.
+
+## Built with
+
+Next.js, TypeScript, Firebase Authentication, Firestore, and Vercel.
+
+## Local development
+
+```sh
+npm ci
+npm run dev
+```
+
+Open http://127.0.0.1:8000. Use `.env.example` for configuration. The leads workspace requires Firebase credentials and an authorized account.
+
+```sh
+npm run typecheck
+npm test
+npm run build
+```
+
+<details>
+<summary>Development and deployment notes</summary>
 
 ## Develop
 
@@ -24,11 +52,6 @@ and Luma are configured with the supplied URLs; Instagram is intentionally empty
 until one is supplied. A destination without a URL is not rendered at all, so the
 link hub never shows a row that cannot be clicked; adding a URL adds its row to
 the stack with no CSS change. Only HTTPS links are accepted.
-
-Team content: Caden's name, role, and program were supplied by Caden. Michael's
-spelling and program were verified against the OpenAI Student Collective
-introduction email dated August 29, 2026. No email addresses or private email
-content are included in the website.
 
 ## Design and accessibility
 
@@ -58,8 +81,7 @@ there, so a future domain change is a single line.
 
 Deployment is manual, from a checkout: run `npx vercel deploy --prod`. There is
 no GitHub integration on this project, so pushing a branch does not publish
-anything. The `main` branch still holds the earlier static site, on an unrelated
-history. The linked Vercel project is
+anything. The linked Vercel project is
 `caden9036-5252s-projects/openai-student-collective-ualberta`.
 
  The old GitHub Pages setup serves static HTML and cannot run the
@@ -98,19 +120,6 @@ IP/form rate buckets (300 per ten minutes to allow shared campus networks), and
 transactional idempotency for retries. Rate records contain no raw IP addresses.
 These controls deter simple spam; they are not identity verification or App Check.
 No Luma integration or automated AI processing of attendee data is enabled.
-
-## Latest design revision
-
-The hero title is smaller, and violet and teal gradients continue into the lower
-sections. Program descriptions follow https://openai.com/student-collective/.
-Michael’s profile photo was sourced from LinkedIn’s connection email. Caden’s
-profile photo and the shared campus photo were retrieved from his signed-in
-LinkedIn profile and announcement post, with his permission. Both are served
-locally so the page does not depend on expiring LinkedIn image URLs.
-
-Photo sources:
-- https://www.linkedin.com/in/caden-johnson-82ba12366/
-- https://www.linkedin.com/feed/update/urn:li:activity:7501032157247881216/
 
 ## Motion and link previews
 
@@ -176,7 +185,7 @@ A pass over the landing page, September 15, 2026:
   travelling highlights, echoing the hero's orbital motif. It is decorative,
   so it is `aria-hidden` and carries no text, and it honours the pause control
   and `prefers-reduced-motion` like the rest of the page. It deliberately does
-  not involve the OpenAI blossom — that mark is used under permission and should
+  not involve the OpenAI blossom ; that mark is used under permission and should
   not be rotated, recoloured, or animated. The rings hold still and only the
   highlight travels; animating the ring transforms would converge all three on a
   shared keyframe and stack them on top of each other.
@@ -195,3 +204,5 @@ A pass over the landing page, September 15, 2026:
   once at their effective value. The `prefers-contrast: more` dimming of the
   colour fields had been cancelled by a later `opacity` declaration and now
   applies.
+
+</details>
