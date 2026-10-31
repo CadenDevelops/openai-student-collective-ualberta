@@ -2304,8 +2304,8 @@ html:not([data-motion]) .section-light::after {
 .past-events-heading h3 { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: -.045em; line-height: 1.1; margin: 8px 0 0; }
 .past-events-heading > p { max-width: 330px; margin: 0; line-height: 1.5; }
 .past-events-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-.past-event { overflow: hidden; border: 1px solid rgba(21, 47, 41, .2); border-radius: 12px; background: rgba(255,255,255,.5); }
-.past-event-photo { min-height: 160px; display: grid; place-items: center; padding: 24px; text-align: center; background: #dce9da; color: #24483a; }
+.past-event { overflow: hidden; border: 1px solid rgba(255,255,255,.18); border-radius: 12px; background: rgba(255,255,255,.07); }
+.past-event-photo { min-height: 160px; display: grid; place-items: center; padding: 24px; text-align: center; background: #343351; color: #f5f3ff; }
 .past-event-photo span { font-size: .85rem; font-weight: 600; letter-spacing: .04em; }
 .past-event-copy { padding: 22px; }
 .past-event-date { margin: 0 0 12px; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
