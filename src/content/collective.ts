@@ -118,6 +118,61 @@ export const collective = {
         alt: "A speaker presenting a project at an OpenAI community event.",
       },
     ],
+    // newest first; an event with photos is shown large, first photo leads
+    past: [
+      {
+        month: "Oct",
+        day: "29",
+        date: "October 29, 2026",
+        title: "Halloween Mixer",
+        description:
+          "A campus community mixer hosted by Ada’s Team, with the Student Collective and fellow student groups.",
+        url: "https://luma.com/p3dmbe7n",
+        photos: [] as { src: string; alt: string }[],
+      },
+      {
+        month: "Oct",
+        day: "24",
+        date: "October 24, 2026",
+        title: "Alberta Non-for-Profit Association Workshop #2",
+        description:
+          "A Student Collective workshop alongside the Alberta Non-for-Profit Association.",
+        url: "https://luma.com/2pzk97yb",
+        photos: [],
+      },
+      {
+        month: "Oct",
+        day: "23",
+        date: "October 23–24, 2026",
+        title: "Case for a Cause",
+        description:
+          "A case competition with the Alberta Non-for-Profit Association, exploring how AI can help student teams solve problems for nonprofits.",
+        url: "https://luma.com/nt34p8ap",
+        photos: [
+          {
+            src: "/events/case-for-a-cause/welcome.webp",
+            alt: "Students in a lecture theatre facing a screen that reads Welcome to Case for a Cause.",
+          },
+          {
+            src: "/events/case-for-a-cause/winners.webp",
+            alt: "The first-place team, Vanguard Consulting, standing in front of their name on the screen.",
+          },
+          {
+            src: "/events/case-for-a-cause/pitch.webp",
+            alt: "Two students in suits presenting their case solution beside a projected slide.",
+          },
+        ],
+      },
+      {
+        month: "Oct",
+        day: "8",
+        date: "October 8, 2026",
+        title: "Create Your Own Personalized Newsletter",
+        description: "A hands-on introduction to creating a personal newsletter with ChatGPT Work.",
+        url: "https://luma.com/2e99dkqy",
+        photos: [],
+      },
+    ],
   },
 };
 

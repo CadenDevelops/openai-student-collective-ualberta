@@ -92,6 +92,41 @@ function EventCard({ event }: { event: LumaEvent }) {
   );
 }
 
+function PastEvent({ event }: { event: (typeof collective.events.past)[number] }) {
+  const [lead, ...rest] = event.photos;
+  return (
+    <li className={`past-event${lead ? " past-event-featured" : ""}`} data-reveal>
+      {lead ? (
+        <div className={`past-photos past-photos-${Math.min(event.photos.length, 3)}`}>
+          {[lead, ...rest.slice(0, 2)].map((photo) => (
+            <img
+              key={photo.src}
+              src={photo.src}
+              alt={photo.alt}
+              width="1200"
+              height="800"
+              loading="lazy"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="past-date" aria-hidden="true">
+          <span>{event.month}</span>
+          <span>{event.day}</span>
+        </div>
+      )}
+      <div className="past-copy">
+        <p className="past-when">{event.date}</p>
+        <h4>{event.title}</h4>
+        <p>{event.description}</p>
+        <a href={event.url} aria-label={`${event.title} on Luma`}>
+          Event page <Arrow />
+        </a>
+      </div>
+    </li>
+  );
+}
+
 export default async function Home() {
   const discord = externalUrl(collective.links.discord);
   const luma = externalUrl(collective.links.luma);
@@ -327,51 +362,17 @@ export default async function Home() {
                   )}
                 </div>
                 <section className="past-events" aria-labelledby="past-events-title">
-                  <div className="past-events-heading" data-reveal>
-                    <div>
-                      <p className="eyebrow">A look back</p>
-                      <h3 id="past-events-title">Past events</h3>
-                    </div>
-                    <p>Workshops, ideas, and community moments from across campus.</p>
-                  </div>
-                  <div className="past-events-grid">
-                    {[
-                      {
-                        date: "October 29, 2026",
-                        title: "Halloween Mixer",
-                        description: "A campus community mixer hosted by Ada’s Team, with the Student Collective and fellow student groups.",
-                        url: "https://luma.com/p3dmbe7n",
-                      },
-                      {
-                        date: "October 24, 2026",
-                        title: "Alberta Non-for-Profit Association Workshop #2",
-                        description: "A Student Collective workshop alongside the Alberta Non-for-Profit Association.",
-                        url: "https://luma.com/2pzk97yb",
-                      },
-                      {
-                        date: "October 23–24, 2026",
-                        title: "Case for a Cause collaboration",
-                        description: "With the Alberta Non-for-Profit Association, exploring how AI can support case solving for nonprofits.",
-                        url: "https://luma.com/nt34p8ap",
-                      },
-                      {
-                        date: "October 8, 2026",
-                        title: "Create Your Own Personalized Newsletter",
-                        description: "A hands-on introduction to creating a personal newsletter with ChatGPT Work.",
-                        url: "https://luma.com/2e99dkqy",
-                      },
-                    ].map((event) => (
-                      <article className="past-event" key={event.title} data-reveal>
-                        <div className="past-event-photo"><span>Photos coming soon</span></div>
-                        <div className="past-event-copy">
-                          <p className="past-event-date">{event.date}</p>
-                          <h4>{event.title}</h4>
-                          <p>{event.description}</p>
-                          <a href={event.url}>View event <Arrow /></a>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
+                  <h3 id="past-events-title" className="upcoming-label" data-reveal>
+                    Past events
+                  </h3>
+                  <ul className="past-list">
+                    {/* events with photos lead so the two-column rows stay full */}
+                    {[...collective.events.past]
+                      .sort((a, b) => Number(b.photos.length > 0) - Number(a.photos.length > 0))
+                      .map((event) => (
+                        <PastEvent key={event.url} event={event} />
+                      ))}
+                  </ul>
                 </section>
                 <h3 className="formats-label" data-reveal>
                   What we run
