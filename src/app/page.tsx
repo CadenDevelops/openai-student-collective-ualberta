@@ -92,37 +92,52 @@ function EventCard({ event }: { event: LumaEvent }) {
   );
 }
 
-function PastEvent({ event }: { event: (typeof collective.events.past)[number] }) {
-  const [lead, ...rest] = event.photos;
+type Past = (typeof collective.events.past)[number];
+
+function PastFeature({ event }: { event: Past }) {
   return (
-    <li className={`past-event${lead ? " past-event-featured" : ""}`} data-reveal>
-      {lead ? (
-        <div className={`past-photos past-photos-${Math.min(event.photos.length, 3)}`}>
-          {[lead, ...rest.slice(0, 2)].map((photo) => (
-            <img
-              key={photo.src}
-              src={photo.src}
-              alt={photo.alt}
-              width="1200"
-              height="800"
-              loading="lazy"
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="past-date" aria-hidden="true">
-          <span>{event.month}</span>
-          <span>{event.day}</span>
-        </div>
-      )}
-      <div className="past-copy">
-        <p className="past-when">{event.date}</p>
-        <h4>{event.title}</h4>
-        <p>{event.description}</p>
-        <a href={event.url} aria-label={`${event.title} on Luma`}>
-          Event page <Arrow />
-        </a>
+    <article className="past-feature" data-reveal>
+      <div className="past-photos">
+        {event.photos.slice(0, 3).map((photo) => (
+          <img
+            key={photo.src}
+            src={photo.src}
+            alt={photo.alt}
+            width="1200"
+            height="800"
+            loading="lazy"
+          />
+        ))}
       </div>
+      <div className="past-feature-copy">
+        <div>
+          <p className="past-when">{event.date}</p>
+          <h4>{event.title}</h4>
+        </div>
+        <div>
+          <p>{event.description}</p>
+          <a href={event.url} aria-label={`${event.title} on Luma`}>
+            Event page <Arrow />
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function PastRow({ event }: { event: Past }) {
+  return (
+    <li data-reveal>
+      <a href={event.url}>
+        <span className="past-row-date">
+          {event.month} {event.day}
+        </span>
+        <span className="past-row-main">
+          <span className="past-row-title">{event.title}</span>
+          <span className="past-row-note">{event.description}</span>
+        </span>
+        <Arrow />
+      </a>
     </li>
   );
 }
@@ -365,14 +380,18 @@ export default async function Home() {
                   <h3 id="past-events-title" className="upcoming-label" data-reveal>
                     Past events
                   </h3>
-                  <ul className="past-list">
-                    {/* events with photos lead so the two-column rows stay full */}
-                    {[...collective.events.past]
-                      .sort((a, b) => Number(b.photos.length > 0) - Number(a.photos.length > 0))
+                  {collective.events.past
+                    .filter((event) => event.photos.length > 0)
+                    .map((event) => (
+                      <PastFeature key={event.url} event={event} />
+                    ))}
+                  <ol className="past-rows">
+                    {collective.events.past
+                      .filter((event) => event.photos.length === 0)
                       .map((event) => (
-                        <PastEvent key={event.url} event={event} />
+                        <PastRow key={event.url} event={event} />
                       ))}
-                  </ul>
+                  </ol>
                 </section>
                 <h3 className="formats-label" data-reveal>
                   What we run
